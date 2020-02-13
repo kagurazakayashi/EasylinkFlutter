@@ -85,11 +85,15 @@ class _MyAppState extends State<MyApp> {
           password: person.password,
           mode: EasyLinkMode.EASYLINK_V2_PLUS,
           timeout: 60);
-      EasyLinkNotification.instance.addObserver('linkstate', (object) {
-        setState(() {
-          _displayinfo = object;
-        });
-        EasyLinkNotification.instance.removeNotification('linkstate');
+          EasyLinkNotification.instance.addObserver('linkstate', (object) {
+          setState(() {
+            if (object != "Stop" && object != "Unknown") {
+              EasylinkFlutter.linkstop();
+            }
+            print(object);
+            _displayinfo = object;
+          });
+          EasyLinkNotification.instance.removeNotification('linkstate');
       });
     } on PlatformException {
       displayinfo = 'ERROR';

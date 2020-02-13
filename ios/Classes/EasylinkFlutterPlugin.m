@@ -17,9 +17,9 @@ MXCHIPAirlink *mx;
      if ([@"getwifiinfo" isEqualToString:call.method]) {
         [self ssid:call result:result];
     }else if ([@"linkstart" isEqualToString:call.method]) {
-        [self link:call result:result];
+        [self linkstart:call result:result];
     }else if([@"linkstop" isEqualToString:call.method]){
-        [self linkstop];
+        [self linkstop:call result:result];
     }else{
         result(FlutterMethodNotImplemented);
 
@@ -74,7 +74,23 @@ MXCHIPAirlink *mx;
         } else if (event == MXCHIPAirlinkEventFound) {
             NSLog(@"resultFound");
 //            result(@"Found");
-            [channel invokeMethod:@"onCallback" arguments:@"Found"];
+            NSMutableDictionary *datadic = nil;
+            if (mx.mataDataDict) {
+                datadic = [NSMutableDictionary dictionary];
+                for (NSString *key in mx.mataDataDict) {
+                    NSData *val = [mx.mataDataDict objectForKey:key];
+                    NSString *base64String = [val base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
+                    [datadic setValue:base64String forKey:key];
+                }
+            } else {
+                datadic = [NSMutableDictionary dictionary];
+            }
+            if (mx.name && [mx.name length] > 0) {
+                [datadic setValue:mx.name forKey:@"name"];
+            }
+            NSData *jsonData = [NSJSONSerialization dataWithJSONObject:datadic options:NSJSONWritingPrettyPrinted error:nil];
+            NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
+            [channel invokeMethod:@"onCallback" arguments:jsonString];
         } else {
             NSLog(@"resultUnknown");
 //            result(@"Unknown");
