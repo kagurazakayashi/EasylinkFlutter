@@ -1,5 +1,10 @@
 package com.example.easylink_flutter;
 
+import io.flutter.plugin.common.BinaryMessenger;
+import android.content.Context;
+import io.flutter.plugin.common.EventChannel;
+import android.net.ConnectivityManager;
+import android.util.Log;
 import androidx.annotation.NonNull;
 import io.flutter.embedding.engine.plugins.FlutterPlugin;
 import io.flutter.plugin.common.MethodCall;
@@ -9,37 +14,40 @@ import io.flutter.plugin.common.MethodChannel.Result;
 import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /** EasylinkFlutterPlugin */
-public class EasylinkFlutterPlugin implements FlutterPlugin, MethodCallHandler {
-  @Override
-  public void onAttachedToEngine(@NonNull FlutterPluginBinding flutterPluginBinding) {
-    final MethodChannel channel = new MethodChannel(flutterPluginBinding.getFlutterEngine().getDartExecutor(), "easylink_flutter");
-    channel.setMethodCallHandler(new EasylinkFlutterPlugin());
-  }
+public class EasylinkFlutterPlugin implements FlutterPlugin {
 
-  // This static function is optional and equivalent to onAttachedToEngine. It supports the old
-  // pre-Flutter-1.12 Android projects. You are encouraged to continue supporting
-  // plugin registration via this function while apps migrate to use the new Android APIs
-  // post-flutter-1.12 via https://flutter.dev/go/android-project-migration.
-  //
-  // It is encouraged to share logic between onAttachedToEngine and registerWith to keep
-  // them functionally equivalent. Only one of onAttachedToEngine or registerWith will be called
-  // depending on the user's project. onAttachedToEngine or registerWith must both be defined
-  // in the same class.
-  public static void registerWith(Registrar registrar) {
-    final MethodChannel channel = new MethodChannel(registrar.messenger(), "easylink_flutter");
-    channel.setMethodCallHandler(new EasylinkFlutterPlugin());
-  }
+    private MethodChannel methodChannel;
+    private EventChannel eventChannel;
 
-  @Override
-  public void onMethodCall(@NonNull MethodCall call, @NonNull Result result) {
-    if (call.method.equals("getPlatformVersion")) {
-      result.success("Android " + android.os.Build.VERSION.RELEASE);
-    } else {
-      result.notImplemented();
+    public static void registerWith(Registrar registrar) {
+        Log.d("!000!", "@000@");
+        EasylinkFlutterPlugin plugin = new EasylinkFlutterPlugin();
+        plugin.setupChannels(registrar.messenger(), registrar.context());
     }
-  }
 
-  @Override
-  public void onDetachedFromEngine(@NonNull FlutterPluginBinding binding) {
-  }
+    @Override
+    public void onAttachedToEngine(FlutterPluginBinding binding) {
+        Log.d("!000!", "@000@");
+        setupChannels(binding.getFlutterEngine().getDartExecutor(), binding.getApplicationContext());
+    }
+
+    @Override
+    public void onDetachedFromEngine(FlutterPluginBinding binding) {
+        teardownChannels();
+    }
+
+    private void setupChannels(BinaryMessenger messenger, Context context) {
+        methodChannel = new MethodChannel(messenger, "easylink_flutter");
+        eventChannel = new EventChannel(messenger, "easylink_flutter");
+        EasylinkMethodChannelHandler methodChannelHandler = new EasylinkMethodChannelHandler(messenger, context);
+
+        methodChannel.setMethodCallHandler(methodChannelHandler);
+    }
+
+    private void teardownChannels() {
+        methodChannel.setMethodCallHandler(null);
+        eventChannel.setStreamHandler(null);
+        methodChannel = null;
+        eventChannel = null;
+    }
 }
