@@ -66,6 +66,7 @@ class _MyAppState extends State<MyApp> {
       Map wifiinfo = await EasylinkFlutter.getwifiinfo();
       //wifiinfo: BSSID,SSID,SSIDDATA
       ssidController.text = wifiinfo["SSID"];
+      print(wifiinfo["SSID"]);
     } on PlatformException {
       //ssidController.text  = '';
     }
@@ -121,7 +122,7 @@ class _MyAppState extends State<MyApp> {
     return null;
   }
 
-  void _handleSubmitted() {
+  void startbtn() {
     print("*******************");
     // checkPermission();
     final FormState form = _formKey.currentState;
@@ -139,6 +140,11 @@ class _MyAppState extends State<MyApp> {
       print("++++++++++++++++++");
       linkstart();
     }
+  }
+
+  void stopbtn() {
+     EasylinkFlutter.linkstop();
+     _displayinfo = "stop.";
   }
 
   @override
@@ -205,9 +211,17 @@ class _MyAppState extends State<MyApp> {
                   child: Text('$_displayinfo'),
                 ),
                 Center(
-                  child: FlatButton(
-                    onPressed: _handleSubmitted,
-                    child: Text('START'),
+                  child: Column(
+                    children: <Widget>[
+                      FlatButton(
+                        onPressed: startbtn,
+                        child: Text('START'),
+                      ),
+                      FlatButton(
+                        onPressed: stopbtn,
+                        child: Text('STOP'),
+                      ),
+                    ],
                   ),
                 ),
               ],
