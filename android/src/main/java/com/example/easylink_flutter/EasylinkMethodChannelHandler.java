@@ -18,14 +18,17 @@ import io.fogcloud.sdk.easylink.helper.EasyLinkCallBack;
 public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHandler {
     private BinaryMessenger mMessenger;
     private Context mContext;
+    private MethodChannel mMethodChannel;
     private EasyLinkAPI ea;
     private String mSSID;
 
-    EasylinkMethodChannelHandler(BinaryMessenger messenger, Context context) {
+    EasylinkMethodChannelHandler(BinaryMessenger messenger, Context context, MethodChannel methodChannel) {
         assert (messenger != null);
         mMessenger = messenger;
         assert (context != null);
         mContext = context;
+        assert (methodChannel != null);
+        mMethodChannel = methodChannel;
         ea = new EasyLinkAPI(mContext);
     }
 
@@ -53,8 +56,11 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
 //                    Log.d("Easylink", message);
 //                }
 //            });
+            result.success("start");
         } else if (call.method.equals("linkstop")) {
             ea.stopEasyLink();
+            mMethodChannel.invokeMethod("onCallback","Stop");
+            result.success("stop");
         } else {
             result.notImplemented();
         }

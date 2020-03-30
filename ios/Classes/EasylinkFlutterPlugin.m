@@ -53,26 +53,17 @@ MXCHIPAirlink *mx;
     NSString *key = call.arguments[@"key"];
     NSString *timeout = call.arguments[@"timeout"];
     NSString *mode = call.arguments[@"mode"];
-    NSLog(@"ssid=%@",ssid);
-    NSLog(@"key=%@",key);
-    NSLog(@"timeout=%@",timeout);
-    NSLog(@"mode=%@",mode);
 //    if (!ssid || [ssid length] == 0) result([FlutterError errorWithCode:@"invalid ssid" message:@"ssid cannot be empty" details:@""]);
 //    if (!key || [key length] == 0) result([FlutterError errorWithCode:@"invalid password" message:@"password cannot be empty" details:@""]);
 //    if (!timeout || [timeout length] == 0) result([FlutterError errorWithCode:@"invalid timeout" message:@"timeout cannot be empty" details:@""]);
     mx = [[MXCHIPAirlink alloc] init];
     EasyLinkMode modeid = [mode intValue];
-    NSLog(@"modeid=%d",modeid);
-    NSLog(@"modeid=%d",EASYLINK_V2_PLUS);
     
     [mx start:ssid key:key timeout:[timeout intValue] mode:modeid  andCallback:^(MXCHIPAirlinkEvent event) {
-        NSLog(@"event=%d",event == MXCHIPAirlinkEventStop);
         if (event == MXCHIPAirlinkEventStop){
-            NSLog(@"resultStop");
 //            result(@"Stop");
             [channel invokeMethod:@"onCallback" arguments:@"Stop"];
         } else if (event == MXCHIPAirlinkEventFound) {
-            NSLog(@"resultFound");
 //            result(@"Found");
             NSMutableDictionary *datadic = nil;
             if (mx.mataDataDict) {
@@ -92,15 +83,14 @@ MXCHIPAirlink *mx;
             NSString *jsonString = [[NSString alloc] initWithData:jsonData encoding:NSUTF8StringEncoding];
             [channel invokeMethod:@"onCallback" arguments:jsonString];
         } else {
-            NSLog(@"resultUnknown");
 //            result(@"Unknown");
             [channel invokeMethod:@"onCallback" arguments:@"Unknown"];
         }
     }];
-    result(@"start...");
+    result(@"start");
 }
 - (void)linkstop:(FlutterMethodCall*)call result:(FlutterResult)result{
     [mx stop];
-    result(@"start...");
+    result(@"stop");
 }
 @end

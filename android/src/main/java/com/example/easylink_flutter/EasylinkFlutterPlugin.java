@@ -37,7 +37,7 @@ public class EasylinkFlutterPlugin implements FlutterPlugin {
     private void setupChannels(BinaryMessenger messenger, Context context) {
         methodChannel = new MethodChannel(messenger, "easylink_flutter");
         eventChannel = new EventChannel(messenger, "easylink_flutter");
-        EasylinkMethodChannelHandler methodChannelHandler = new EasylinkMethodChannelHandler(messenger, context);
+        EasylinkMethodChannelHandler methodChannelHandler = new EasylinkMethodChannelHandler(messenger, context, methodChannel);
 
         methodChannel.setMethodCallHandler(methodChannelHandler);
     }
