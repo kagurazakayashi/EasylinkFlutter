@@ -29,7 +29,6 @@ public class EasyLinkAPI {
     private EasyLinkCallBack mFTCListener;
 
     public EasyLinkAPI(Context context) {
-        Log.d("EasyLinkAPI", "init");
         mContext = context;
     }
 

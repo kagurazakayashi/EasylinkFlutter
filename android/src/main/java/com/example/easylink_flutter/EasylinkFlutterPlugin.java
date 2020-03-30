@@ -20,14 +20,12 @@ public class EasylinkFlutterPlugin implements FlutterPlugin {
     private EventChannel eventChannel;
 
     public static void registerWith(Registrar registrar) {
-        Log.d("!000!", "@000@");
         EasylinkFlutterPlugin plugin = new EasylinkFlutterPlugin();
         plugin.setupChannels(registrar.messenger(), registrar.context());
     }
 
     @Override
     public void onAttachedToEngine(FlutterPluginBinding binding) {
-        Log.d("!000!", "@000@");
         setupChannels(binding.getFlutterEngine().getDartExecutor(), binding.getApplicationContext());
     }
 

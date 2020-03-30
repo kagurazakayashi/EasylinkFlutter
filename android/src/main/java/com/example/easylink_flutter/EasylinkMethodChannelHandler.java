@@ -22,7 +22,6 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
     private String mSSID;
 
     EasylinkMethodChannelHandler(BinaryMessenger messenger, Context context) {
-        Log.d("!111!", "@111@");
         assert (messenger != null);
         mMessenger = messenger;
         assert (context != null);
@@ -32,7 +31,6 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
 
     @Override
     public void onMethodCall(MethodCall call, MethodChannel.Result result) {
-        Log.d("!222!", "@222@");
         if (call.method.equals("getwifiinfo")) {
             mSSID = ea.getSSID();
             Map<String, String> returndic = new HashMap<String, String>();
@@ -43,10 +41,6 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
             String key = call.argument("key");
             String timeout = call.argument("timeout");
             String mode = call.argument("mode");
-            Log.d("Easylink", "ssid: "+ssid);
-            Log.d("Easylink", "key: "+key);
-            Log.d("Easylink", "timeout: "+timeout);
-            Log.d("Easylink", "mode: "+mode);
             ea.startEasylink(ssid,key);
 //            ea.startFTC(ssid,key,new EasyLinkCallBack() {
 //                @Override
