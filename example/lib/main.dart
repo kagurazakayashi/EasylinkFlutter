@@ -1,4 +1,6 @@
 // 示例程序
+// import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -41,24 +43,27 @@ class _MyAppState extends State<MyApp> {
   }
 
   getpermission() {
-    requestPermission(PermissionGroup.locationAlways);
+    requestPermission(Permission.locationWhenInUse);
   }
 
 //获取权限
-  requestPermission(PermissionGroup rep) async {
-    await PermissionHandler().requestPermissions([rep]);
-    checkPermission(rep);
+  requestPermission(Permission rep) async {
+    await rep.request();
+    checkPermission(context, rep);
   }
 
-  checkPermission(PermissionGroup rep) async {
-    PermissionStatus permission =
-        await PermissionHandler().checkPermissionStatus(rep);
-    if (permission == PermissionStatus.granted) {
-      print("权限申请通过");
-      getssid();
-    } else {
-      print("权限申请被拒绝");
-    }
+  checkPermission(BuildContext context, Permission rep) async {
+    // PermissionStatus permission =
+    // await PermissionHandler().checkPermissionStatus(rep);
+    Scaffold.of(context).showSnackBar(SnackBar(
+      content: Text((await rep.status).toString()),
+    ));
+    // if (permission == PermissionStatus.granted) {
+    //   print("权限申请通过");
+    //   getssid();
+    // } else {
+    //   print("权限申请被拒绝");
+    // }
   }
 
   Future<void> getssid() async {
@@ -86,15 +91,15 @@ class _MyAppState extends State<MyApp> {
           password: person.password,
           mode: EasyLinkMode.EASYLINK_V2_PLUS,
           timeout: 60);
-          EasyLinkNotification.instance.addObserver('linkstate', (object) {
-          setState(() {
-            if (object != "Stop" && object != "Unknown") {
-              EasylinkFlutter.linkstop();
-            }
-            print(object);
-            _displayinfo = object;
-          });
-          EasyLinkNotification.instance.removeNotification('linkstate');
+      EasyLinkNotification.instance.addObserver('linkstate', (object) {
+        setState(() {
+          if (object != "Stop" && object != "Unknown") {
+            EasylinkFlutter.linkstop();
+          }
+          print(object);
+          _displayinfo = object;
+        });
+        EasyLinkNotification.instance.removeNotification('linkstate');
       });
     } on PlatformException {
       displayinfo = 'ERROR';
@@ -143,8 +148,8 @@ class _MyAppState extends State<MyApp> {
   }
 
   void stopbtn() {
-     EasylinkFlutter.linkstop();
-     _displayinfo = "stop.";
+    EasylinkFlutter.linkstop();
+    _displayinfo = "stop.";
   }
 
   @override
