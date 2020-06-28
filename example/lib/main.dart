@@ -40,6 +40,7 @@ class _MyAppState extends State<MyApp> {
     super.dispose();
     ssidController.clear();
     pwController.clear();
+    EasylinkFlutter.linkstop();
   }
 
   getpermission() {
@@ -48,22 +49,23 @@ class _MyAppState extends State<MyApp> {
 
 //获取权限
   requestPermission(Permission rep) async {
+    print("申请权限");
     await rep.request();
-    checkPermission(context, rep);
+    checkPermission(rep);
   }
 
-  checkPermission(BuildContext context, Permission rep) async {
+  checkPermission(Permission rep) async {
     // PermissionStatus permission =
     // await PermissionHandler().checkPermissionStatus(rep);
-    Scaffold.of(context).showSnackBar(SnackBar(
-      content: Text((await rep.status).toString()),
-    ));
-    // if (permission == PermissionStatus.granted) {
-    //   print("权限申请通过");
-    //   getssid();
-    // } else {
-    //   print("权限申请被拒绝");
-    // }
+    // Scaffold.of(context).showSnackBar(SnackBar(
+    //   content: Text((await rep.status).toString()),
+    // ));
+    if (await rep.status.isRestricted) {
+      print("权限申请通过");
+    } else {
+      print("权限申请被拒绝");
+    }
+      getssid();
   }
 
   Future<void> getssid() async {
@@ -147,6 +149,10 @@ class _MyAppState extends State<MyApp> {
     }
   }
 
+  Future<void> slbtn() async {
+    await EasylinkFlutter.ls();
+  }
+
   void stopbtn() {
     EasylinkFlutter.linkstop();
     _displayinfo = "stop.";
@@ -221,6 +227,10 @@ class _MyAppState extends State<MyApp> {
                       FlatButton(
                         onPressed: startbtn,
                         child: Text('START'),
+                      ),
+                      FlatButton(
+                        onPressed: slbtn,
+                        child: Text('SL'),
                       ),
                       FlatButton(
                         onPressed: stopbtn,

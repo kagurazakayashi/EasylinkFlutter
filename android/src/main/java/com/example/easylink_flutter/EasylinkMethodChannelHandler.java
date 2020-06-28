@@ -85,12 +85,12 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
             mEasyServer.start(new EasyLinkCallBack() {
                 @Override
                 public void onSuccess(int code, String message) {
-                    Log.d("===EASYLINK===","mEasyServer onSuccess"+message);
+                    Log.d("===EASYLINK===","mEasyServer onSuccess "+message);
                 }
 
                 @Override
                 public void onFailure(int code, String message) {
-                    Log.d("===EASYLINK===","mEasyServer onFailure"+message);
+                    Log.d("===EASYLINK===","mEasyServer onFailure "+message);
                 }
             });
 
@@ -110,7 +110,10 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
                 e.printStackTrace();
             }
             try {
-                ea.transmitSettings(ssid,key, getNormalIP(), 10, "", "");
+                Log.d("===EASYLINK===","EasyLink_plus start");
+                int ip = getNormalIP();
+                Log.d("===EASYLINK IP===",Integer.toString(ip));
+                ea.transmitSettings(ssid,key, ip, 10, "", "");
 //            mEasylinkPlus.transmitSettings(ssid.getBytes("UTF-8"),password.getBytes("UTF-8"), userinfo);
             } catch (Exception e) {
                 e.printStackTrace();
@@ -121,8 +124,33 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
             result.success("start");
         } else if (call.method.equals("linkstop")) {
             ea.stopTransmitting();
+            mEasyServer.stop();
             mMethodChannel.invokeMethod("onCallback","Stop");
             result.success("stop");
+        }else if (call.method.equals("ls")) {
+            mEasyServer = new EasyServer(8000);
+            mEasyServer.start(new EasyLinkCallBack() {
+                @Override
+                public void onSuccess(int code, String message) {
+                    Log.d("Easylink", message);
+                }
+
+                @Override
+                public void onFailure(int code, String message) {
+                    Log.d("Easylink", message);
+                }
+            });
+            // ea.startFTC(new EasyLinkCallBack() {
+            //     @Override
+            //     public void onSuccess(int code, String message) {
+            //         Log.d("Easylink", message);
+            //     }
+
+            //     @Override
+            //     public void onFailure(int code, String message) {
+            //         Log.d("Easylink", message);
+            //     }
+            // });
         } else {
             result.notImplemented();
         }

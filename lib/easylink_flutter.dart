@@ -48,6 +48,9 @@ class EasylinkFlutter {
     print(version);
     return version;
   }
+  static Future<void> ls() async {
+    await _channel.invokeMethod('ls');
+  }
   static Future<String> linkstop() async {
     final String version = await _channel.invokeMethod('linkstop');
     print(version);
