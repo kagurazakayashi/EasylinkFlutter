@@ -28,10 +28,13 @@ class _MyAppState extends State<MyApp> {
   TextEditingController pwController = TextEditingController();
   PersonData person = PersonData();
   bool _autovalidate = false;
+  bool isstartlink = false;
 
   @override
   void initState() {
     getpermission();
+    ssidController.text = "net.uuu.moe-iot";
+    pwController.text = "IoT-Link_2019";
     super.initState();
   }
 
@@ -65,15 +68,17 @@ class _MyAppState extends State<MyApp> {
     } else {
       print("权限申请被拒绝");
     }
-      getssid();
+    getssid();
   }
 
   Future<void> getssid() async {
     try {
       Map wifiinfo = await EasylinkFlutter.getwifiinfo();
       //wifiinfo: BSSID,SSID,SSIDDATA
-      ssidController.text = wifiinfo["SSID"];
-      print(wifiinfo["SSID"]);
+      if (wifiinfo["SSID"] != "") {
+        ssidController.text = wifiinfo["SSID"];
+        print(wifiinfo["SSID"]);
+      }
     } on PlatformException {
       //ssidController.text  = '';
     }
@@ -87,12 +92,16 @@ class _MyAppState extends State<MyApp> {
       _displayinfo = 'Searching...';
     });
 
+    // try {
+    displayinfo = await EasylinkFlutter.linkstart(
+        ssid: person.name,
+        password: person.password,
+        mode: EasyLinkMode.EASYLINK_V2_PLUS,
+        timeout: 60);
+    // } on PlatformException {
+    //   displayinfo = 'ERROR!1';
+    // }
     try {
-      displayinfo = await EasylinkFlutter.linkstart(
-          ssid: person.name,
-          password: person.password,
-          mode: EasyLinkMode.EASYLINK_V2_PLUS,
-          timeout: 60);
       EasyLinkNotification.instance.addObserver('linkstate', (object) {
         setState(() {
           if (object != "Stop" && object != "Unknown") {
@@ -104,7 +113,7 @@ class _MyAppState extends State<MyApp> {
         EasyLinkNotification.instance.removeNotification('linkstate');
       });
     } on PlatformException {
-      displayinfo = 'ERROR';
+      displayinfo = 'ERROR!2';
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -145,7 +154,10 @@ class _MyAppState extends State<MyApp> {
       print(person.name);
       print(person.password);
       print("++++++++++++++++++");
-      linkstart();
+      if (!isstartlink) {
+        isstartlink = true;
+        linkstart();
+      }
     }
   }
 
@@ -154,6 +166,7 @@ class _MyAppState extends State<MyApp> {
   }
 
   void stopbtn() {
+    isstartlink = false;
     EasylinkFlutter.linkstop();
     _displayinfo = "stop.";
   }

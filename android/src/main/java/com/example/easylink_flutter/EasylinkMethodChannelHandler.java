@@ -1,5 +1,8 @@
 package com.example.easylink_flutter;
 
+import android.annotation.SuppressLint;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import io.flutter.plugin.common.BinaryMessenger;
 import android.content.Context;
@@ -30,6 +33,9 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
     private EasyServer mEasyServer;
     private WifiManager mWifiManager;
     private WifiInfo mWifiInfo;
+    private Handler handler;
+
+    private NsdClientManager nsdClientManager;
 
     EasylinkMethodChannelHandler(BinaryMessenger messenger, Context context, MethodChannel methodChannel) {
         assert (messenger != null);
@@ -38,7 +44,21 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
         mContext = context;
         assert (methodChannel != null);
         mMethodChannel = methodChannel;
+        handler = new Handler() {
+            @Override
+            public void handleMessage(Message msg) {
+                Log.d("handleMessage", String.valueOf(msg.what));
+                Log.d("handleMessage", msg.obj.toString());
+//            switch (msg.what) {
+//                case 1:
+//                    serverInformation.setText(msg.obj.toString());
+//                    break;
+//            }
+            }
+        };
     }
+
+//    @SuppressLint("HandlerLeak")
 
     @Override
     public void onMethodCall(MethodCall call, MethodChannel.Result result) {
@@ -79,20 +99,34 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
 //            });
 
 
-            Log.d("===EASYLINK===","mEasyServer EasyServer");
-            mEasyServer = new EasyServer(8000);
-            Log.d("===EASYLINK===","mEasyServer EasyLinkCallBack");
-            mEasyServer.start(new EasyLinkCallBack() {
-                @Override
-                public void onSuccess(int code, String message) {
-                    Log.d("===EASYLINK===","mEasyServer onSuccess "+message);
-                }
 
-                @Override
-                public void onFailure(int code, String message) {
-                    Log.d("===EASYLINK===","mEasyServer onFailure "+message);
-                }
-            });
+//            Log.d("===EASYLINK===","mEasyServer EasyServer");
+//            mEasyServer = new EasyServer(8000);
+//            Log.d("===EASYLINK===","mEasyServer EasyLinkCallBack");
+//            mEasyServer.start(new EasyLinkCallBack() {
+//                @Override
+//                public void onSuccess(int code, String message) {
+//                    Log.d("===EASYLINK===","mEasyServer onSuccess "+message);
+//                }
+//
+//                @Override
+//                public void onFailure(int code, String message) {
+//                    Log.d("===EASYLINK===","mEasyServer onFailure "+message);
+//                }
+//            });
+
+//            EasylinkNSDServer mdns = new EasylinkNSDServer(mContext);
+//            mdns.init();
+//            mdns.registerService("_easylink_config._tcp.local.",8000);
+
+//            EasylinkNSDClient mdnsc = new EasylinkNSDClient(mContext);
+//            mdnsc.discoveryNSDServer();
+//            mdnsc.resoleServer();
+
+//            NsdClient nsdc = new NsdClient(mContext);
+
+//            nsdClientManager = NsdClientManager.getInstance(mContext, handler);
+//            nsdClientManager.searchNsdServer("_easylink_config._tcp.local.");
 
 
             if (ea == null) {
