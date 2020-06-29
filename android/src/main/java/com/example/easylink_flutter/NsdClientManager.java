@@ -68,4 +68,7 @@ public class NsdClientManager {
 
         nsdClient.startNSDClient(mHandler);
     }
+    public void stop(){
+        nsdClient.stopNSDServer();
+    }
 }

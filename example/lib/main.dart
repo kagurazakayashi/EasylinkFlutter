@@ -92,7 +92,7 @@ class _MyAppState extends State<MyApp> {
       _displayinfo = 'Searching...';
     });
 
-    // try {
+    try {
     displayinfo = await EasylinkFlutter.linkstart(
         ssid: person.name,
         password: person.password,
@@ -101,7 +101,7 @@ class _MyAppState extends State<MyApp> {
     // } on PlatformException {
     //   displayinfo = 'ERROR!1';
     // }
-    try {
+    // try {
       EasyLinkNotification.instance.addObserver('linkstate', (object) {
         setState(() {
           if (object != "Stop" && object != "Unknown") {
