@@ -1,4 +1,4 @@
-<p align="center"><img src="icon/icon.png" width="128"></p>
+![EasylinkFlutter](icon/icon.png)
 
 # EasylinkFlutter
 

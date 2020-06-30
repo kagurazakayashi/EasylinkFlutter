@@ -284,7 +284,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                         //   child: Text('SL'),
                         // ),
                         FlatButton(
-                          onPressed: stopbtn,
+                          onPressed: () {
+                            if (isstartlink) {
+                              stopbtn();
+                            }
+                          },
                           child: Text('STOP'),
                         ),
                       ],

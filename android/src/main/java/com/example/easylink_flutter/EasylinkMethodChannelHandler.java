@@ -40,6 +40,7 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
     private WifiManager mWifiManager;
     private WifiInfo mWifiInfo;
     private Handler handler;
+    private Boolean isRunning = false;
 
     private NsdClientManager nsdClientManager;
 
@@ -70,9 +71,7 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
 
             Handler myhandler = new Handler() {
                 public void handleMessage(android.os.Message msg) {
-                    elp.stopTransmitting();
-                    nsdClientManager.stop();
-                    mMethodChannel.invokeMethod("onCallback", "Stop");
+                    linkstop();
                 }
             };
             myhandler.sendMessageDelayed(Message.obtain(myhandler, 1), Integer.parseInt(timeout)*1000);
@@ -124,8 +123,10 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
                         }
                     }
                     mMethodChannel.invokeMethod("onCallback", node.toString());
+                    linkstop();
                 }
             });
+            isRunning = true;
             nsdClientManager.searchNsdServer("_easylink_config._tcp.");
 
             if (elp == null) {
@@ -155,17 +156,20 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
 
 
         } else if (call.method.equals("linkstop")) {
-            linkstop(result);
+            linkstop();
+            result.success("stop");
         } else {
             result.notImplemented();
         }
     }
 
-    private void linkstop(MethodChannel.Result result) {
-        elp.stopTransmitting();
-        nsdClientManager.stop();
-        mMethodChannel.invokeMethod("onCallback", "Stop");
-        result.success("stop");
+    private void linkstop() {
+        if (isRunning) {
+            isRunning = false;
+            elp.stopTransmitting();
+            nsdClientManager.stop();
+            mMethodChannel.invokeMethod("onCallback", "Stop");
+        }
     }
 
     public int getNormalIP() {
