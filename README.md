@@ -35,7 +35,9 @@
   - 调用 `EasylinkFlutter.linkstart` ，该方法需要以下参数：
     - `ssid`: Wi-Fi 网络名
     - `password`: Wi-Fi 网络密码
-    - `mode`: EasyLink 的模式，示例使用的是 `EasyLinkMode.EASYLINK_V2_PLUS`
+    - `mode`: EasyLink 的模式，可选项：
+      - `EASYLINK_V1`,`EASYLINK_V2`,`EASYLINK_PLUS`,`EASYLINK_V2_PLUS`,`EASYLINK_AWS`,`EASYLINK_SOFT_AP`,`EASYLINK_MODE_MAX`。
+      - 示例使用的是 `EasyLinkMode.EASYLINK_V2_PLUS`，安卓只支持此项（此项包括V1和V2）。
     - `timeout`: 超时时间
   - 方法会返回一个字符串状态信息。
   - 下面是一个示例：
@@ -50,8 +52,9 @@
 5. 监听返回通知
   - 使用 `EasyLinkNotification.instance.addObserver('linkstate', (object)` 来监听通知。
   - `object` 是 `String` 类型，可以返回以下内容：
-    - `start`: 开始执行
-    - `stop`: 执行结束、终止、超时
+    - `Start`: 开始执行
+    - `Stop`: 执行结束、终止、超时
+    - `Unknown`: 状态未知
     - 其他 String: 错误信息
     - JSON: 设备返回的详细信息，解析整理为了 JSON。内容为字符串字典类型。
   - 下面是一个示例：

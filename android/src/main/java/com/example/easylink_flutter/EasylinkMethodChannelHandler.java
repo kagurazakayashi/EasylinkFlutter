@@ -53,7 +53,7 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
     }
 
     @Override
-    public void onMethodCall(MethodCall call, MethodChannel.Result result) {
+    public void onMethodCall(MethodCall call, final MethodChannel.Result result) {
         if (call.method.equals("getwifiinfo")) {
             EasyLink el = new EasyLink(mContext);
             mSSID = el.getSSID();
@@ -67,6 +67,15 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
             String key = call.argument("key");
             String timeout = call.argument("timeout");
             String mode = call.argument("mode");
+
+            Handler myhandler = new Handler() {
+                public void handleMessage(android.os.Message msg) {
+                    elp.stopTransmitting();
+                    nsdClientManager.stop();
+                    mMethodChannel.invokeMethod("onCallback", "Stop");
+                }
+            };
+            myhandler.sendMessageDelayed(Message.obtain(myhandler, 1), Integer.parseInt(timeout)*1000);
 
             nsdClientManager = NsdClientManager.getInstance(mContext, new Handler() {
                 @Override

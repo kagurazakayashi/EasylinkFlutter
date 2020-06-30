@@ -60,24 +60,24 @@ public class NsdClient {
             @Override
             public void onStartDiscoveryFailed(String serviceType, int errorCode) {
                 mNsdManager.stopServiceDiscovery(this);
-                Log.e(TAG, "onStartDiscoveryFailed():");
+//                Log.e(TAG, "onStartDiscoveryFailed():");
             }
 
             @Override
             public void onStopDiscoveryFailed(String serviceType, int errorCode) {
                 mNsdManager.stopServiceDiscovery(this);
-                Log.e(TAG, "onStopDiscoveryFailed():");
+//                Log.e(TAG, "onStopDiscoveryFailed():");
             }
 
             @Override
             public void onDiscoveryStarted(String serviceType) {
-                Log.e(TAG, "onDiscoveryStarted():");
-                Log.d("===onDiscoveryStarted===", serviceType);
+//                Log.e(TAG, "onDiscoveryStarted():");
+//                Log.d("===onDiscoveryStarted===", serviceType);
             }
 
             @Override
             public void onDiscoveryStopped(String serviceType) {
-                Log.e(TAG, "onDiscoveryStopped():");
+//                Log.e(TAG, "onDiscoveryStopped():");
             }
 
             /**
@@ -86,21 +86,21 @@ public class NsdClient {
              */
             @Override
             public void onServiceFound(NsdServiceInfo serviceInfo) {
-                Log.e(TAG, "onServiceFound: " + serviceInfo);
-                Log.d("Name: ", String.valueOf(serviceInfo.getServiceType().equals(mServiceName)));
+//                Log.e(TAG, "onServiceFound: " + serviceInfo);
+//                Log.d("Name: ", String.valueOf(serviceInfo.getServiceType().equals(mServiceName)));
                 discoveryList.add(serviceInfo.toString());
                 // 根据咱服务器的定义名称，指定解析该 NsdServiceInfo
                 if (serviceInfo.getServiceType().equals(mServiceName)) {
                     String serviceName = serviceInfo.getServiceName();
                     String serviceType = serviceInfo.getServiceType();
-                    Log.e(TAG, "onServiceResolved 已解析:" + serviceName);
+//                    Log.e(TAG, "onServiceResolved 已解析:" + serviceName);
                     mNsdManager.resolveService(serviceInfo, mResolverListener);
                 }
             }
 
             @Override
             public void onServiceLost(NsdServiceInfo serviceInfo) {
-                Log.e(TAG, "onServiceLost(): serviceInfo=" + serviceInfo);
+//                Log.e(TAG, "onServiceLost(): serviceInfo=" + serviceInfo);
                 discoveryList.remove(serviceInfo.toString());
             }
         };
@@ -113,12 +113,12 @@ public class NsdClient {
         mResolverListener = new NsdManager.ResolveListener() {
             @Override
             public void onResolveFailed(NsdServiceInfo serviceInfo, int errorCode) {
-                Log.e(TAG, "onResolveFailed:" + serviceInfo + " ErrorCode: " + errorCode);
+//                Log.e(TAG, "onResolveFailed:" + serviceInfo + " ErrorCode: " + errorCode);
             }
 
             @Override
             public void onServiceResolved(NsdServiceInfo serviceInfo) {
-                Log.e(TAG, "onServiceResolved:" + serviceInfo);
+//                Log.e(TAG, "onServiceResolved:" + serviceInfo);
                 int port = serviceInfo.getPort();
                 String serviceName = serviceInfo.getServiceName();
                 String hostAddress = serviceInfo.getHost().getHostAddress();
@@ -128,8 +128,7 @@ public class NsdClient {
                 message.obj = serviceInfo.toString();
                 mHandler.sendMessage(message);
 
-                Log.e(TAG, "onServiceResolved 已解析:" + " host:" + hostAddress + ":" + port + " ----- serviceName: "
-                        + serviceName);
+//                Log.e(TAG, "onServiceResolved 已解析:" + " host:" + hostAddress + ":" + port + " ----- serviceName: "+ serviceName);
                 // TODO 建立网络连接
 
             }

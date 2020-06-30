@@ -22,7 +22,7 @@ class MyApp extends StatefulWidget {
   _MyAppState createState() => _MyAppState();
 }
 
-class _MyAppState extends State<MyApp> {
+class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   String _displayinfo = 'Unknown';
   String _jsoninfo = '';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -32,16 +32,36 @@ class _MyAppState extends State<MyApp> {
   bool _autovalidate = false;
   bool isstartlink = false;
   String tag = "[EasyLinkFlutter Example APP] ";
-  bool _isiOS = true;
   int getrepnum = 0;
 
   @override
   void initState() {
     getssid();
     getConnectivity();
-    ssidController.text = "net.uuu.moe-iot";
-    pwController.text = "IoT-Link_2019";
+    ssidController.text = "";
+    pwController.text = "";
+    WidgetsBinding.instance.addObserver(this);
     super.initState();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    print("--" + state.toString());
+    switch (state) {
+      case AppLifecycleState.inactive: // 处于这种状态的应用程序应该假设它们可能在任何时候暂停。
+        print("处于这种状态的应用程序应该假设它们可能在任何时候暂停。");
+        break;
+      case AppLifecycleState.resumed: // 应用程序可见，前台
+        print("应用程序可见，前台");
+        break;
+      case AppLifecycleState.paused: // 应用程序不可见，后台
+        print("应用程序不可见，后台");
+        if (isstartlink) stopbtn();
+        break;
+      case AppLifecycleState.detached:
+        print("detached");
+        break;
+    }
   }
 
   @override
@@ -126,7 +146,7 @@ class _MyAppState extends State<MyApp> {
           if (cbstr != "Stop" && cbstr != "Unknown") {
             EasylinkFlutter.linkstop();
           }
-          if (cbstr.substring(0,1) == "{") {
+          if (cbstr.substring(0, 1) == "{") {
             _jsoninfo = object;
             _displayinfo = "OK";
           } else {
@@ -191,85 +211,91 @@ class _MyAppState extends State<MyApp> {
     final mqdwindow = MediaQueryData.fromWindow(window);
     final windowWidth = mqdwindow.size.width;
     return MaterialApp(
-      home: Scaffold(
-        appBar: AppBar(
-          title: Text(_displayinfo),
-        ),
-        body: Form(
-          key: _formKey,
-          autovalidate: _autovalidate,
-          child: SingleChildScrollView(
-            child: Column(
-              children: <Widget>[
-                TextFormField(
-                  // initialValue: person.name,
-                  textCapitalization: TextCapitalization.words,
-                  // style: TextStyle(color: Colors.white),
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    filled: true,
-                    icon: Icon(
-                      Icons.wifi,
-                      // color: Colors.white,
-                    ),
-                    hintText: 'WiFi SSID',
-                    // hintStyle: TextStyle(color: Colors.white54),
-                    labelText: 'WiFi SSID',
-                    // labelStyle: TextStyle(color: Colors.white54),
-                    // fillColor: Colors.white,
-                  ),
-                  onSaved: (String value) {
-                    person.name = value;
-                  },
-                  validator: _validateName,
-                  controller: ssidController,
-                ),
-                const SizedBox(height: 24.0),
-                TextFormField(
-                  decoration: const InputDecoration(
-                    border: UnderlineInputBorder(),
-                    filled: true,
-                    icon: Icon(
-                      Icons.vpn_key,
-                      // color: Colors.white,
-                    ),
-                    hintText: 'WiFi Password',
-                    // hintStyle: TextStyle(color: Colors.white54),
-                    labelText: 'WiFi Password',
-                    // labelStyle: TextStyle(color: Colors.white54),
-                    // fillColor: Colors.white,
-                  ),
-                  validator: _validatePassWord,
-                  onSaved: (String value) {
-                    setState(() {
-                      person.password = value;
-                    });
-                  },
-                  controller: pwController,
-                ),
-                Center(
-                  child: Column(
-                    children: <Widget>[
-                      FlatButton(
-                        onPressed: startbtn,
-                        child: Text('START'),
+      home: WillPopScope(
+        onWillPop: () async {
+          if (isstartlink) stopbtn();
+          return Future.value(true);
+        },
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text(_displayinfo),
+          ),
+          body: Form(
+            key: _formKey,
+            autovalidate: _autovalidate,
+            child: SingleChildScrollView(
+              child: Column(
+                children: <Widget>[
+                  TextFormField(
+                    // initialValue: person.name,
+                    textCapitalization: TextCapitalization.words,
+                    // style: TextStyle(color: Colors.white),
+                    decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      filled: true,
+                      icon: Icon(
+                        Icons.wifi,
+                        // color: Colors.white,
                       ),
-                      // FlatButton(
-                      //   onPressed: slbtn,
-                      //   child: Text('SL'),
-                      // ),
-                      FlatButton(
-                        onPressed: stopbtn,
-                        child: Text('STOP'),
-                      ),
-                    ],
+                      hintText: 'WiFi SSID',
+                      // hintStyle: TextStyle(color: Colors.white54),
+                      labelText: 'WiFi SSID',
+                      // labelStyle: TextStyle(color: Colors.white54),
+                      // fillColor: Colors.white,
+                    ),
+                    onSaved: (String value) {
+                      person.name = value;
+                    },
+                    validator: _validateName,
+                    controller: ssidController,
                   ),
-                ),
-                Container(
-                  width: windowWidth,
-                  child: Text(_jsoninfo),
-                )
-              ],
+                  const SizedBox(height: 24.0),
+                  TextFormField(
+                    decoration: const InputDecoration(
+                      border: UnderlineInputBorder(),
+                      filled: true,
+                      icon: Icon(
+                        Icons.vpn_key,
+                        // color: Colors.white,
+                      ),
+                      hintText: 'WiFi Password',
+                      // hintStyle: TextStyle(color: Colors.white54),
+                      labelText: 'WiFi Password',
+                      // labelStyle: TextStyle(color: Colors.white54),
+                      // fillColor: Colors.white,
+                    ),
+                    validator: _validatePassWord,
+                    onSaved: (String value) {
+                      setState(() {
+                        person.password = value;
+                      });
+                    },
+                    controller: pwController,
+                  ),
+                  Center(
+                    child: Column(
+                      children: <Widget>[
+                        FlatButton(
+                          onPressed: startbtn,
+                          child: Text('START'),
+                        ),
+                        // FlatButton(
+                        //   onPressed: slbtn,
+                        //   child: Text('SL'),
+                        // ),
+                        FlatButton(
+                          onPressed: stopbtn,
+                          child: Text('STOP'),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Container(
+                    width: windowWidth,
+                    child: Text(_jsoninfo),
+                  )
+                ],
+              ),
             ),
           ),
         ),
