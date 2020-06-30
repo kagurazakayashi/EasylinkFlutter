@@ -1,4 +1,6 @@
 // 示例程序
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 
@@ -22,6 +24,7 @@ class MyApp extends StatefulWidget {
 
 class _MyAppState extends State<MyApp> {
   String _displayinfo = 'Unknown';
+  String _jsoninfo = '';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController ssidController = TextEditingController();
   TextEditingController pwController = TextEditingController();
@@ -89,8 +92,7 @@ class _MyAppState extends State<MyApp> {
       print(tag + "插件返回信息：");
       print(wifiinfo);
       //wifiinfo: BSSID,SSID,SSIDDATA
-      print(wifiinfo["SSID"]);
-      if (wifiinfo["SSID"] == "<unknown ssid>") {
+      if (wifiinfo.length == 0) {
         checkPermission(Permission.locationWhenInUse);
       } else {
         ssidController.text = wifiinfo["SSID"];
@@ -120,10 +122,16 @@ class _MyAppState extends State<MyApp> {
     try {
       EasyLinkNotification.instance.addObserver('linkstate', (object) {
         setState(() {
-          if (object != "Stop" && object != "Unknown") {
+          String cbstr = object;
+          if (cbstr != "Stop" && cbstr != "Unknown") {
             EasylinkFlutter.linkstop();
           }
-          _displayinfo = object;
+          if (cbstr.substring(0,1) == "{") {
+            _jsoninfo = object;
+            _displayinfo = "OK";
+          } else {
+            _displayinfo = object;
+          }
         });
         EasyLinkNotification.instance.removeNotification('linkstate');
       });
@@ -180,10 +188,12 @@ class _MyAppState extends State<MyApp> {
 
   @override
   Widget build(BuildContext context) {
+    final mqdwindow = MediaQueryData.fromWindow(window);
+    final windowWidth = mqdwindow.size.width;
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: Text('$_displayinfo'),
+          title: Text(_displayinfo),
         ),
         body: Form(
           key: _formKey,
@@ -199,7 +209,7 @@ class _MyAppState extends State<MyApp> {
                     border: UnderlineInputBorder(),
                     filled: true,
                     icon: Icon(
-                      Icons.person,
+                      Icons.wifi,
                       // color: Colors.white,
                     ),
                     hintText: 'WiFi SSID',
@@ -220,7 +230,7 @@ class _MyAppState extends State<MyApp> {
                     border: UnderlineInputBorder(),
                     filled: true,
                     icon: Icon(
-                      Icons.person,
+                      Icons.vpn_key,
                       // color: Colors.white,
                     ),
                     hintText: 'WiFi Password',
@@ -237,9 +247,6 @@ class _MyAppState extends State<MyApp> {
                   },
                   controller: pwController,
                 ),
-                // Center(
-                //   child: Text('$_displayinfo'),
-                // ),
                 Center(
                   child: Column(
                     children: <Widget>[
@@ -258,6 +265,10 @@ class _MyAppState extends State<MyApp> {
                     ],
                   ),
                 ),
+                Container(
+                  width: windowWidth,
+                  child: Text(_jsoninfo),
+                )
               ],
             ),
           ),

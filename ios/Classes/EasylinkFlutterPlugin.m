@@ -70,8 +70,9 @@ MXCHIPAirlink *mx;
                 datadic = [NSMutableDictionary dictionary];
                 for (NSString *key in mx.mataDataDict) {
                     NSData *val = [mx.mataDataDict objectForKey:key];
-                    NSString *base64String = [val base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
-                    [datadic setValue:base64String forKey:key];
+                    NSString *strv = [[NSString alloc] initWithData:val encoding:NSUTF8StringEncoding];
+//                    NSString *strv = [val base64EncodedStringWithOptions:NSDataBase64EncodingEndLineWithLineFeed];
+                    [datadic setValue:strv forKey:key];
                 }
             } else {
                 datadic = [NSMutableDictionary dictionary];

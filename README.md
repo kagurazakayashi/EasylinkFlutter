@@ -47,7 +47,35 @@
     timeout: 60
   );
 ```
-5. 监听
+5. 监听返回通知
+  - 使用 `EasyLinkNotification.instance.addObserver('linkstate', (object)` 来监听通知。
+  - `object` 是 `String` 类型，可以返回以下内容：
+    - `start`: 开始执行
+    - `stop`: 执行结束、终止、超时
+    - 其他 String: 错误信息
+    - JSON: 设备返回的详细信息，解析整理为了 JSON。内容为字符串字典类型。
+  - 下面是一个示例：
+```
+  try {
+    EasyLinkNotification.instance.addObserver('linkstate', (object) {
+      setState(() {
+        String cbstr = object;
+        if (cbstr != "Stop" && cbstr != "Unknown") {
+          EasylinkFlutter.linkstop();
+        }
+        if (cbstr.substring(0,1) == "{") {
+          _jsoninfo = object;
+          _displayinfo = "OK";
+        } else {
+          _displayinfo = object;
+        }
+      });
+      EasyLinkNotification.instance.removeNotification('linkstate');
+    });
+  } on PlatformException {
+    displayinfo = 'ERROR!';
+  }
+```
 
 ## 安卓运行时需要注意的事项
 
@@ -64,3 +92,13 @@
 - `EASYLINK_PLUS`
 
 不支持 `EasylinkP2P`
+
+## 截图（找到设备并返回由设备提供的信息）
+
+Android:
+
+![Android](screenshots/android.jpg)
+
+iOS:
+
+![iOS](screenshots/ios.jpg)

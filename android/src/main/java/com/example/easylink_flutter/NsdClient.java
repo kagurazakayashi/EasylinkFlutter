@@ -94,7 +94,7 @@ public class NsdClient {
                     String serviceName = serviceInfo.getServiceName();
                     String serviceType = serviceInfo.getServiceType();
                     Log.e(TAG, "onServiceResolved 已解析:" + serviceName);
-                    // mNsdManager.resolveService(serviceInfo, mResolverListener);
+                    mNsdManager.resolveService(serviceInfo, mResolverListener);
                 }
             }
 
@@ -130,7 +130,6 @@ public class NsdClient {
 
                 Log.e(TAG, "onServiceResolved 已解析:" + " host:" + hostAddress + ":" + port + " ----- serviceName: "
                         + serviceName);
-                resolveList.add(" host:" + hostAddress + ":" + port);
                 // TODO 建立网络连接
 
             }
