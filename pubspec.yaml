@@ -1,6 +1,6 @@
 name: easylink_flutter
 description: Wi-Fi Settings to MXCHIP/MXOS-based IoT hardware
-version: 0.9.0
+version: 0.9.1
 homepage: https://github.com/kagurazakayashi/EasylinkFlutter
 
 environment:

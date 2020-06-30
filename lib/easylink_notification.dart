@@ -7,15 +7,15 @@ class EasyLinkNotification {
   static EasyLinkNotification get instance => _getInstance();
   static EasyLinkNotification _instance;
 
-  EasyLinkNotification._internal() {
-    // 初始化
-  }
-
   static EasyLinkNotification _getInstance() {
     if (_instance == null) {
       _instance = new EasyLinkNotification._internal();
     }
     return _instance;
+  }
+
+  EasyLinkNotification._internal() {
+    _instance = new EasyLinkNotification._internal();
   }
 
   //创建Map来记录名称
