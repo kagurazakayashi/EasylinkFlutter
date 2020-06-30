@@ -1,21 +1,13 @@
 // 示例程序
-// import 'dart:html';
-
-import 'dart:html';
-
 import 'package:flutter/material.dart';
 import 'dart:async';
-import 'package:flutter/foundation.dart' as foundation;
 
 import 'package:connectivity/connectivity.dart';
-import 'package:device_info/device_info.dart';
 import 'package:flutter/services.dart';
 import 'package:easylink_flutter/easylink_flutter.dart';
 import 'package:easylink_flutter/easylink_notification.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-//判断是否为IOS
-bool get isIOS => foundation.defaultTargetPlatform == TargetPlatform.iOS;
 void main() => runApp(MyApp());
 
 class PersonData {
@@ -42,6 +34,7 @@ class _MyAppState extends State<MyApp> {
 
   @override
   void initState() {
+    getssid();
     getConnectivity();
     ssidController.text = "net.uuu.moe-iot";
     pwController.text = "IoT-Link_2019";
@@ -93,14 +86,14 @@ class _MyAppState extends State<MyApp> {
   Future<void> getssid() async {
     try {
       Map wifiinfo = await EasylinkFlutter.getwifiinfo();
-      print(tag+"插件返回信息：");
+      print(tag + "插件返回信息：");
       print(wifiinfo);
       //wifiinfo: BSSID,SSID,SSIDDATA
       print(wifiinfo["SSID"]);
-      if (wifiinfo["SSID"] != "<SSID unkown>") {
-        ssidController.text = wifiinfo["SSID"];
-      } else {
+      if (wifiinfo["SSID"] == "<unknown ssid>") {
         checkPermission(Permission.locationWhenInUse);
+      } else {
+        ssidController.text = wifiinfo["SSID"];
       }
     } on PlatformException {
       //ssidController.text  = '';
@@ -116,11 +109,11 @@ class _MyAppState extends State<MyApp> {
     });
 
     try {
-    displayinfo = await EasylinkFlutter.linkstart(
-        ssid: person.name,
-        password: person.password,
-        mode: EasyLinkMode.EASYLINK_V2_PLUS,
-        timeout: 60);
+      displayinfo = await EasylinkFlutter.linkstart(
+          ssid: person.name,
+          password: person.password,
+          mode: EasyLinkMode.EASYLINK_V2_PLUS,
+          timeout: 60);
     } on PlatformException {
       displayinfo = 'ERROR ID 1';
     }
@@ -165,7 +158,7 @@ class _MyAppState extends State<MyApp> {
     final FormState form = _formKey.currentState;
     if (!form.validate()) {
       _autovalidate = true; // 开始验证每个更改.
-      print(tag+"表单输入不正确");
+      print(tag + "表单输入不正确");
     } else {
       form.save();
       if (!isstartlink) {
