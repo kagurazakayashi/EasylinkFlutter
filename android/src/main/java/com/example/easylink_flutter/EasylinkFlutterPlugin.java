@@ -15,6 +15,7 @@ import io.flutter.plugin.common.PluginRegistry.Registrar;
 
 /** EasylinkFlutterPlugin */
 public class EasylinkFlutterPlugin implements FlutterPlugin {
+    private static final String TAG = "EasylinkFlutterPlugin";
 
     private MethodChannel methodChannel;
     private EventChannel eventChannel;

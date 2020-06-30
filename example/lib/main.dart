@@ -1,14 +1,21 @@
 // 示例程序
 // import 'dart:html';
 
+import 'dart:html';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
+import 'package:flutter/foundation.dart' as foundation;
 
+import 'package:connectivity/connectivity.dart';
+import 'package:device_info/device_info.dart';
 import 'package:flutter/services.dart';
 import 'package:easylink_flutter/easylink_flutter.dart';
 import 'package:easylink_flutter/easylink_notification.dart';
 import 'package:permission_handler/permission_handler.dart';
 
+//判断是否为IOS
+bool get isIOS => foundation.defaultTargetPlatform == TargetPlatform.iOS;
 void main() => runApp(MyApp());
 
 class PersonData {
@@ -29,10 +36,13 @@ class _MyAppState extends State<MyApp> {
   PersonData person = PersonData();
   bool _autovalidate = false;
   bool isstartlink = false;
+  String tag = "[EasyLinkFlutter Example APP] ";
+  bool _isiOS = true;
+  int getrepnum = 0;
 
   @override
   void initState() {
-    getpermission();
+    getConnectivity();
     ssidController.text = "net.uuu.moe-iot";
     pwController.text = "IoT-Link_2019";
     super.initState();
@@ -46,8 +56,11 @@ class _MyAppState extends State<MyApp> {
     EasylinkFlutter.linkstop();
   }
 
-  getpermission() {
-    requestPermission(Permission.locationWhenInUse);
+  getConnectivity() async {
+    var connectivityResult = await (Connectivity().checkConnectivity());
+    if (connectivityResult != ConnectivityResult.wifi) {
+      print("没开WiFi");
+    }
   }
 
 //获取权限
@@ -55,6 +68,7 @@ class _MyAppState extends State<MyApp> {
     print("申请权限");
     await rep.request();
     checkPermission(rep);
+    getrepnum++;
   }
 
   checkPermission(Permission rep) async {
@@ -63,21 +77,30 @@ class _MyAppState extends State<MyApp> {
     // Scaffold.of(context).showSnackBar(SnackBar(
     //   content: Text((await rep.status).toString()),
     // ));
-    if (await rep.status.isRestricted) {
+    if (await rep.status.isGranted) {
       print("权限申请通过");
+      // 以下两种方式都能获取SSID
+      getConnectivity();
+      getssid();
     } else {
       print("权限申请被拒绝");
+      if (getrepnum < 1) {
+        requestPermission(rep);
+      }
     }
-    getssid();
   }
 
   Future<void> getssid() async {
     try {
       Map wifiinfo = await EasylinkFlutter.getwifiinfo();
+      print(tag+"插件返回信息：");
+      print(wifiinfo);
       //wifiinfo: BSSID,SSID,SSIDDATA
-      if (wifiinfo["SSID"] != "") {
+      print(wifiinfo["SSID"]);
+      if (wifiinfo["SSID"] != "<SSID unkown>") {
         ssidController.text = wifiinfo["SSID"];
-        print(wifiinfo["SSID"]);
+      } else {
+        checkPermission(Permission.locationWhenInUse);
       }
     } on PlatformException {
       //ssidController.text  = '';
@@ -98,22 +121,21 @@ class _MyAppState extends State<MyApp> {
         password: person.password,
         mode: EasyLinkMode.EASYLINK_V2_PLUS,
         timeout: 60);
-    // } on PlatformException {
-    //   displayinfo = 'ERROR!1';
-    // }
-    // try {
+    } on PlatformException {
+      displayinfo = 'ERROR ID 1';
+    }
+    try {
       EasyLinkNotification.instance.addObserver('linkstate', (object) {
         setState(() {
           if (object != "Stop" && object != "Unknown") {
             EasylinkFlutter.linkstop();
           }
-          print(object);
           _displayinfo = object;
         });
         EasyLinkNotification.instance.removeNotification('linkstate');
       });
     } on PlatformException {
-      displayinfo = 'ERROR!2';
+      displayinfo = 'ERROR! ID 2';
     }
 
     // If the widget was removed from the tree while the asynchronous platform
@@ -139,21 +161,13 @@ class _MyAppState extends State<MyApp> {
   }
 
   void startbtn() {
-    print("*******************");
     // checkPermission();
     final FormState form = _formKey.currentState;
     if (!form.validate()) {
       _autovalidate = true; // 开始验证每个更改.
-      // print("------------------");
-      print("error");
-      // print("------------------");
-      // showInSnackBar('提交前请改正用红色标记错误.');
+      print(tag+"表单输入不正确");
     } else {
       form.save();
-      print("++++++++++++++++++");
-      print(person.name);
-      print(person.password);
-      print("++++++++++++++++++");
       if (!isstartlink) {
         isstartlink = true;
         linkstart();
@@ -168,7 +182,7 @@ class _MyAppState extends State<MyApp> {
   void stopbtn() {
     isstartlink = false;
     EasylinkFlutter.linkstop();
-    _displayinfo = "stop.";
+    _displayinfo = "Stopped.";
   }
 
   @override
@@ -176,7 +190,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       home: Scaffold(
         appBar: AppBar(
-          title: const Text('Plugin example app'),
+          title: Text('$_displayinfo'),
         ),
         body: Form(
           key: _formKey,
@@ -195,14 +209,13 @@ class _MyAppState extends State<MyApp> {
                       Icons.person,
                       // color: Colors.white,
                     ),
-                    hintText: '您的用户名',
+                    hintText: 'WiFi SSID',
                     // hintStyle: TextStyle(color: Colors.white54),
-                    labelText: '用户名 *',
+                    labelText: 'WiFi SSID',
                     // labelStyle: TextStyle(color: Colors.white54),
                     // fillColor: Colors.white,
                   ),
                   onSaved: (String value) {
-                    print(value);
                     person.name = value;
                   },
                   validator: _validateName,
@@ -217,9 +230,9 @@ class _MyAppState extends State<MyApp> {
                       Icons.person,
                       // color: Colors.white,
                     ),
-                    hintText: '64位一下密码',
+                    hintText: 'WiFi Password',
                     // hintStyle: TextStyle(color: Colors.white54),
-                    labelText: '密码 *',
+                    labelText: 'WiFi Password',
                     // labelStyle: TextStyle(color: Colors.white54),
                     // fillColor: Colors.white,
                   ),
@@ -231,9 +244,9 @@ class _MyAppState extends State<MyApp> {
                   },
                   controller: pwController,
                 ),
-                Center(
-                  child: Text('$_displayinfo'),
-                ),
+                // Center(
+                //   child: Text('$_displayinfo'),
+                // ),
                 Center(
                   child: Column(
                     children: <Widget>[
@@ -241,10 +254,10 @@ class _MyAppState extends State<MyApp> {
                         onPressed: startbtn,
                         child: Text('START'),
                       ),
-                      FlatButton(
-                        onPressed: slbtn,
-                        child: Text('SL'),
-                      ),
+                      // FlatButton(
+                      //   onPressed: slbtn,
+                      //   child: Text('SL'),
+                      // ),
                       FlatButton(
                         onPressed: stopbtn,
                         child: Text('STOP'),

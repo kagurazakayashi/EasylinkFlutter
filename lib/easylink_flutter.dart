@@ -26,7 +26,7 @@ class EasylinkFlutter {
   static MethodChannel _channel = const MethodChannel('easylink_flutter')
     ..setMethodCallHandler((MethodCall methodCall) {
       if ("onCallback" == methodCall.method) {
-        print("=====onCallback====="+methodCall.arguments);
+        print("[EasylinkFlutter] "+methodCall.arguments);
         EasyLinkNotification.instance.postNotification('linkstate', methodCall.arguments);
       }
       return Future.value(true);

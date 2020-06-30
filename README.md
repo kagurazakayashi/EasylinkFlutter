@@ -1,3 +1,5 @@
+<p align="center"><img src="icon/icon.png" width="128"></p>
+
 # EasylinkFlutter
 
 对基于 MXCHIP/MXOS 的 IoT WiFi 硬件模组进行无线网络设置的发送工作的 Flutter 插件。
