@@ -16,6 +16,7 @@ enum EasyLinkMode {
   EASYLINK_MODE_MAX,
 }
 
+// ignore: avoid_classes_with_only_static_members
 class EasylinkFlutter {
   // 建立OC通道
   // static MethodChannel _channel =
@@ -23,11 +24,12 @@ class EasylinkFlutter {
 
   //     });
 
-  static MethodChannel _channel = const MethodChannel('easylink_flutter')
+  static final MethodChannel _channel = const MethodChannel('easylink_flutter')
     ..setMethodCallHandler((MethodCall methodCall) {
-      if ("onCallback" == methodCall.method) {
+      if ('onCallback' == methodCall.method) {
         EasyLinkNotification.instance.postNotification('linkstate', methodCall.arguments);
       }
+      // ignore: always_specify_types
       return Future.value(true);
     });
 
@@ -38,6 +40,7 @@ class EasylinkFlutter {
       EasyLinkMode mode = EasyLinkMode.EASYLINK_V2_PLUS,
       int timeout = 60}) async {
     print(mode);
+    // ignore: always_specify_types
     final String version = await _channel.invokeMethod('linkstart', {
       'ssid': ssid,
       'key': password,
@@ -56,7 +59,9 @@ class EasylinkFlutter {
     return version;
   }
 
+  // ignore: always_specify_types
   static Future<Map> getwifiinfo() async {
+    // ignore: always_specify_types
     final Map wifiinfo = await _channel.invokeMethod('getwifiinfo');
     //wifiinfo: BSSID,SSID,SSIDDATA
     return wifiinfo;

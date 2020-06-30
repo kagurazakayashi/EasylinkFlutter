@@ -8,22 +8,22 @@ class EasyLinkNotification {
   static EasyLinkNotification _instance;
 
   static EasyLinkNotification _getInstance() {
-    if (_instance == null) {
-      _instance = new EasyLinkNotification._internal();
-    }
+    _instance ??= EasyLinkNotification._internal();
     return _instance;
   }
 
+  // ignore: sort_constructors_first
   EasyLinkNotification._internal() {
-    _instance = new EasyLinkNotification._internal();
+    _instance = EasyLinkNotification._internal();
   }
 
   //创建Map来记录名称
-  Map<String, dynamic> postNameMap = Map<String, dynamic>();
+  Map<String, dynamic> postNameMap = <String, dynamic>{};
 
   GetObject getObject;
 
   //添加监听者方法
+  // ignore: always_declare_return_types
   addObserver(String postName, object(dynamic object)) {
 
     postNameMap[postName] = null;
@@ -31,6 +31,7 @@ class EasyLinkNotification {
   }
 
   //发送通知传值
+  // ignore: always_declare_return_types
   postNotification(String postName, dynamic object) {
     //检索Map是否含有postName
     if (postNameMap.containsKey(postName)) {
@@ -41,6 +42,7 @@ class EasyLinkNotification {
 
   }
   //移除通知
+  // ignore: always_declare_return_types
   removeNotification(String postName) {
       
      if (postNameMap.containsKey(postName)) {

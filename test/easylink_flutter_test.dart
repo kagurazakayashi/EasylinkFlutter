@@ -18,6 +18,6 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    expect(await EasylinkFlutter.linkstart(ssid: "null", password: "null"), '42');
+    expect(await EasylinkFlutter.linkstart(ssid: 'null', password: 'null'), '42');
   });
 }

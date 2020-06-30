@@ -2,6 +2,7 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+// ignore: directives_ordering
 import 'dart:async';
 
 import 'package:connectivity/connectivity.dart';
@@ -31,35 +32,36 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   PersonData person = PersonData();
   bool _autovalidate = false;
   bool isstartlink = false;
-  String tag = "[EasyLinkFlutter Example APP] ";
+  String tag = '[EasyLinkFlutter Example APP] ';
   int getrepnum = 0;
 
   @override
   void initState() {
     getssid();
     getConnectivity();
-    ssidController.text = "";
-    pwController.text = "";
+    ssidController.text = '';
+    pwController.text = '';
     WidgetsBinding.instance.addObserver(this);
     super.initState();
   }
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print("--" + state.toString());
+    print('--' + state.toString());
     switch (state) {
       case AppLifecycleState.inactive: // 处于这种状态的应用程序应该假设它们可能在任何时候暂停。
-        print("处于这种状态的应用程序应该假设它们可能在任何时候暂停。");
+        print('处于这种状态的应用程序应该假设它们可能在任何时候暂停。');
         break;
       case AppLifecycleState.resumed: // 应用程序可见，前台
-        print("应用程序可见，前台");
+        print('应用程序可见，前台');
         break;
       case AppLifecycleState.paused: // 应用程序不可见，后台
-        print("应用程序不可见，后台");
+        print('应用程序不可见，后台');
+        // ignore: always_put_control_body_on_new_line
         if (isstartlink) stopbtn();
         break;
       case AppLifecycleState.detached:
-        print("detached");
+        print('detached');
         break;
     }
   }
@@ -72,21 +74,25 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     EasylinkFlutter.linkstop();
   }
 
+  // ignore: always_declare_return_types
   getConnectivity() async {
-    var connectivityResult = await (Connectivity().checkConnectivity());
+    // ignore: unnecessary_parenthesis
+    final ConnectivityResult connectivityResult = await (Connectivity().checkConnectivity());
     if (connectivityResult != ConnectivityResult.wifi) {
-      print("没开WiFi");
+      print('没开WiFi');
     }
   }
 
 //获取权限
+  // ignore: always_declare_return_types
   requestPermission(Permission rep) async {
-    print("申请权限");
+    print('申请权限');
     await rep.request();
     checkPermission(rep);
     getrepnum++;
   }
 
+  // ignore: always_declare_return_types
   checkPermission(Permission rep) async {
     // PermissionStatus permission =
     // await PermissionHandler().checkPermissionStatus(rep);
@@ -94,12 +100,12 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     //   content: Text((await rep.status).toString()),
     // ));
     if (await rep.status.isGranted) {
-      print("权限申请通过");
+      print('权限申请通过');
       // 以下两种方式都能获取SSID
       getConnectivity();
       getssid();
     } else {
-      print("权限申请被拒绝");
+      print('权限申请被拒绝');
       if (getrepnum < 1) {
         requestPermission(rep);
       }
@@ -108,14 +114,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   Future<void> getssid() async {
     try {
-      Map wifiinfo = await EasylinkFlutter.getwifiinfo();
-      print(tag + "插件返回信息：");
+      // ignore: always_specify_types
+      final Map wifiinfo = await EasylinkFlutter.getwifiinfo();
+      print(tag + '插件返回信息：');
       print(wifiinfo);
       //wifiinfo: BSSID,SSID,SSIDDATA
-      if (wifiinfo.length == 0) {
+      if (wifiinfo.isEmpty) {
         checkPermission(Permission.locationWhenInUse);
       } else {
-        ssidController.text = wifiinfo["SSID"];
+        ssidController.text = wifiinfo['SSID'] as String;
       }
     } on PlatformException {
       //ssidController.text  = '';
@@ -140,17 +147,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       displayinfo = 'ERROR ID 1';
     }
     try {
+      // ignore: always_specify_types
       EasyLinkNotification.instance.addObserver('linkstate', (object) {
         setState(() {
-          String cbstr = object;
-          if (cbstr != "Stop" && cbstr != "Unknown") {
+          final String cbstr = object as String;
+          if (cbstr != 'Stop' && cbstr != 'Unknown') {
             EasylinkFlutter.linkstop();
           }
-          if (cbstr.substring(0, 1) == "{") {
-            _jsoninfo = object;
-            _displayinfo = "OK";
+          if (cbstr.substring(0, 1) == '{') {
+            _jsoninfo = object as String;
+            _displayinfo = 'OK';
           } else {
-            _displayinfo = object;
+            _displayinfo = object as String;
           }
         });
         EasyLinkNotification.instance.removeNotification('linkstate');
@@ -162,6 +170,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     // If the widget was removed from the tree while the asynchronous platform
     // message was in flight, we want to discard the reply rather than calling
     // setState to update our non-existent appearance.
+    // ignore: always_put_control_body_on_new_line
     if (!mounted) return;
 
     setState(() {
@@ -170,6 +179,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   String _validateName(String value) {
+    // ignore: always_put_control_body_on_new_line
     if (value.isEmpty) return '用户名不能为空.';
     // final RegExp nameExp = RegExp(r'^[0-9a-zA-Z]+$');
     // if (!nameExp.hasMatch(value)) return '只能输入字母和数字.';
@@ -177,6 +187,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   String _validatePassWord(String value) {
+    // ignore: always_put_control_body_on_new_line
     if (value.isEmpty) return '密码不能为空.';
     return null;
   }
@@ -186,7 +197,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     final FormState form = _formKey.currentState;
     if (!form.validate()) {
       _autovalidate = true; // 开始验证每个更改.
-      print(tag + "表单输入不正确");
+      print(tag + '表单输入不正确');
     } else {
       form.save();
       if (!isstartlink) {
@@ -203,17 +214,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   void stopbtn() {
     isstartlink = false;
     EasylinkFlutter.linkstop();
-    _displayinfo = "Stopped.";
+    _displayinfo = 'Stopped.';
   }
 
   @override
   Widget build(BuildContext context) {
-    final mqdwindow = MediaQueryData.fromWindow(window);
-    final windowWidth = mqdwindow.size.width;
+    final MediaQueryData mqdwindow = MediaQueryData.fromWindow(window);
+    final double windowWidth = mqdwindow.size.width;
     return MaterialApp(
       home: WillPopScope(
         onWillPop: () async {
+          // ignore: always_put_control_body_on_new_line
           if (isstartlink) stopbtn();
+          // ignore: always_specify_types
           return Future.value(true);
         },
         child: Scaffold(
@@ -277,7 +290,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       children: <Widget>[
                         FlatButton(
                           onPressed: startbtn,
-                          child: Text('START'),
+                          child: const Text('START'),
                         ),
                         // FlatButton(
                         //   onPressed: slbtn,
@@ -289,7 +302,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                               stopbtn();
                             }
                           },
-                          child: Text('STOP'),
+                          child: const Text('STOP'),
                         ),
                       ],
                     ),
