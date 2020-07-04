@@ -26,6 +26,7 @@ public class NsdClient {
     private IServerFound mIServerFound;
     private ArrayList<String> discoveryList = new ArrayList<>();
     private ArrayList<String> resolveList = new ArrayList<>();
+    private Thread mNSDClientThread;
 
     /**
      * @param context:上下文对象
@@ -39,8 +40,7 @@ public class NsdClient {
     }
 
     public void startNSDClient(final Handler handler) {
-
-        new Thread() {
+        mNSDClientThread = new Thread() {
             @Override
             public void run() {
                 mHandler = handler;
@@ -49,7 +49,8 @@ public class NsdClient {
                 initializeResolveListener();// 初始化解析器
                 mNsdManager.discoverServices(NSD_SERVER_TYPE, NsdManager.PROTOCOL_DNS_SD, mDiscoveryListener);// 开启扫描
             }
-        }.start();
+        };
+        mNSDClientThread.start();
     }
 
     /**
@@ -93,7 +94,7 @@ public class NsdClient {
                 if (serviceInfo.getServiceType().equals(mServiceName)) {
                     String serviceName = serviceInfo.getServiceName();
                     String serviceType = serviceInfo.getServiceType();
-//                    Log.e(TAG, "onServiceResolved 已解析:" + serviceName);
+                    Log.e(TAG, "onServiceResolved 已收到:" + serviceName);
                     mNsdManager.resolveService(serviceInfo, mResolverListener);
                 }
             }
@@ -127,17 +128,22 @@ public class NsdClient {
                 message.what = 1;
                 message.obj = serviceInfo.toString();
                 mHandler.sendMessage(message);
-
 //                Log.e(TAG, "onServiceResolved 已解析:" + " host:" + hostAddress + ":" + port + " ----- serviceName: "+ serviceName);
-                // TODO 建立网络连接
-
             }
         };
     }
 
     public void stopNSDServer() {
         mNsdManager.stopServiceDiscovery(mDiscoveryListener);
+        if (mNSDClientThread.getState() != Thread.State.TERMINATED) {
+            mNSDClientThread.interrupt();
+        }
+        mNSDClientThread = null;
+        mNsdManager = null;
+        mDiscoveryListener = null;
+        mResolverListener = null;
     }
+
 
     public interface IServerFound {
 

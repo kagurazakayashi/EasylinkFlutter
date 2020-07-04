@@ -87,6 +87,7 @@ MXCHIPAirlink *mx;
 //            result(@"Unknown");
             [channel invokeMethod:@"onCallback" arguments:@"Unknown"];
         }
+        mx = nil;
     }];
     result(@"start");
 }

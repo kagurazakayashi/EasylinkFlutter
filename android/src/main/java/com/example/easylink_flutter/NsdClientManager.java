@@ -56,6 +56,7 @@ public class NsdClientManager {
                     if (info.getServiceName().equals(nsdServerName)) {
                         //扫描到指定的server停止扫描
                         nsdClient.stopNSDServer();
+                        nsdClient = null;
                     }
                 }
             }
@@ -68,7 +69,8 @@ public class NsdClientManager {
 
         nsdClient.startNSDClient(mHandler);
     }
-    public void stop(){
+    public void stop() {
         nsdClient.stopNSDServer();
+        nsdClient = null;
     }
 }

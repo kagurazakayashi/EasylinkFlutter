@@ -3,6 +3,7 @@ package com.example.easylink_flutter;
 import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
 import android.util.Log;
 import io.flutter.plugin.common.BinaryMessenger;
@@ -19,6 +20,8 @@ import java.net.NetworkInterface;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 import java.util.regex.Pattern;
 
 import io.flutter.plugin.common.MethodCall;
@@ -41,6 +44,8 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
     private WifiInfo mWifiInfo;
     private Handler handler;
     private Boolean isRunning = false;
+    private Timer timeouttimer = null;
+    private Boolean timeoutnew = false;
 
     private NsdClientManager nsdClientManager;
 
@@ -59,22 +64,38 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
             EasyLink el = new EasyLink(mContext);
             mSSID = el.getSSID();
             Map<String, String> returndic = new HashMap<String, String>();
-            if (mSSID != "<unknown ssid>") {
+            if (!mSSID.equals("<unknown ssid>") && !mSSID.equals("unknown ssid")) {
                 returndic.put("SSID", mSSID);
             }
             result.success(returndic);
         } else if (call.method.equals("linkstart")) {
+            linkstop(true);
             String ssid = call.argument("ssid");
             String key = call.argument("key");
             String timeout = call.argument("timeout");
             String mode = call.argument("mode");
 
-            Handler myhandler = new Handler() {
-                public void handleMessage(android.os.Message msg) {
-                    linkstop();
+            timeouttimer = new Timer();
+            timeoutnew = true;
+            TimerTask task = new TimerTask() {
+                @Override
+                public void run() {
+                    if (timeoutnew) {
+                        timeoutnew = false;
+                    } else {
+                        Log.e("timeouthandler","timeout");
+                        linkstop(true);
+                        Handler mainHandler = new Handler(Looper.getMainLooper());
+                        mainHandler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                mMethodChannel.invokeMethod("onCallback", "Stop");
+                            }
+                        });
+                    }
                 }
             };
-            myhandler.sendMessageDelayed(Message.obtain(myhandler, 1), Integer.parseInt(timeout)*1000);
+            timeouttimer.schedule(task,0,1000*Integer.parseInt(timeout));
 
             nsdClientManager = NsdClientManager.getInstance(mContext, new Handler() {
                 @Override
@@ -123,7 +144,7 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
                         }
                     }
                     mMethodChannel.invokeMethod("onCallback", node.toString());
-                    linkstop();
+                    linkstop(true);
                 }
             });
             isRunning = true;
@@ -156,19 +177,30 @@ public class EasylinkMethodChannelHandler implements MethodChannel.MethodCallHan
 
 
         } else if (call.method.equals("linkstop")) {
-            linkstop();
+            linkstop(false);
             result.success("stop");
         } else {
             result.notImplemented();
         }
     }
 
-    private void linkstop() {
+    private void linkstop(Boolean noCallback) {
+        if (timeouttimer != null) {
+            timeouttimer.cancel();
+            timeouttimer = null;
+        }
         if (isRunning) {
             isRunning = false;
-            elp.stopTransmitting();
-            nsdClientManager.stop();
-            mMethodChannel.invokeMethod("onCallback", "Stop");
+            try {
+                elp.stopTransmitting();
+                nsdClientManager.stop();
+            } catch(Exception e) {
+            }
+            nsdClientManager = null;
+            if (!noCallback) {
+//                Runtime.getRuntime().gc();
+                mMethodChannel.invokeMethod("onCallback", "Stop");
+            }
         }
     }
 
