@@ -1,4 +1,5 @@
 // 示例程序
+import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
@@ -26,6 +27,7 @@ class MyApp extends StatefulWidget {
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   String _displayinfo = 'Unknown';
   String _jsoninfo = '';
+  String _btntext = '▶️ START';
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
   TextEditingController ssidController = TextEditingController();
   TextEditingController pwController = TextEditingController();
@@ -47,21 +49,20 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    print('--' + state.toString());
     switch (state) {
       case AppLifecycleState.inactive: // 处于这种状态的应用程序应该假设它们可能在任何时候暂停。
-        print('处于这种状态的应用程序应该假设它们可能在任何时候暂停。');
+        // print('处于这种状态的应用程序应该假设它们可能在任何时候暂停。');
         break;
       case AppLifecycleState.resumed: // 应用程序可见，前台
-        print('应用程序可见，前台');
+        // print('应用程序可见，前台');
         break;
       case AppLifecycleState.paused: // 应用程序不可见，后台
-        print('应用程序不可见，后台');
+        // print('应用程序不可见，后台');
         // ignore: always_put_control_body_on_new_line
         if (isstartlink) stopbtn();
         break;
       case AppLifecycleState.detached:
-        print('detached');
+        // print('detached');
         break;
     }
   }
@@ -160,6 +161,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           } else {
             _displayinfo = object as String;
           }
+          isstartlink = false;
+          _btntext = '▶️ START';
         });
         EasyLinkNotification.instance.removeNotification('linkstate');
       });
@@ -202,8 +205,18 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       form.save();
       if (!isstartlink) {
         isstartlink = true;
+        _btntext = '⏹ STOP';
+        _jsoninfo = '';
         linkstart();
       }
+    }
+  }
+
+  void startorstopbtn() {
+    if (isstartlink) {
+      stopbtn();
+    } else {
+      startbtn();
     }
   }
 
@@ -213,6 +226,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   void stopbtn() {
     isstartlink = false;
+    _btntext = '▶️ START';
     EasylinkFlutter.linkstop();
     _displayinfo = 'Stopped.';
   }
@@ -231,6 +245,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         },
         child: Scaffold(
           appBar: AppBar(
+            leading: Image.asset('images/icon.png'),
             title: Text(_displayinfo),
           ),
           body: Form(
@@ -289,20 +304,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                     child: Column(
                       children: <Widget>[
                         FlatButton(
-                          onPressed: startbtn,
-                          child: const Text('START'),
-                        ),
-                        // FlatButton(
-                        //   onPressed: slbtn,
-                        //   child: Text('SL'),
-                        // ),
-                        FlatButton(
+                          onPressed: startorstopbtn,
+                          child: Text(_btntext),
+                        ),FlatButton(
                           onPressed: () {
-                            if (isstartlink) {
-                              stopbtn();
-                            }
+                            stopbtn();
+                            exit(0);
                           },
-                          child: const Text('STOP'),
+                          child: const Text('EXIT'),
                         ),
                       ],
                     ),

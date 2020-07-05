@@ -13,7 +13,7 @@
     git:
       url: https://github.com/kagurazakayashi/EasylinkFlutter.git
 ```
-2. 向用户索取「位置服务」权限。
+2. 向用户索取「位置服务」权限（在 iOS > 12 或 Android > 8 时）。
   - 要获得当前 SSID ，「位置服务」权限是必须的。
   - 如果让用户自己输入网络名，可以跳过本步骤和下一步骤。
   - 示例程序中使用的权限获取插件是 `permission_handler` 。
@@ -56,7 +56,7 @@
     - `Stop`: 执行结束、终止、超时
     - `Unknown`: 状态未知
     - 其他 String: 错误信息
-    - JSON: 设备返回的详细信息，解析整理为了 JSON。内容为字符串字典类型。
+    - JSON: 成功，插件将设备返回的详细信息解析整理为 JSON 返回，内容为字符串字典类型。
   - 下面是一个示例：
 ```
   try {
@@ -66,9 +66,9 @@
         if (cbstr != "Stop" && cbstr != "Unknown") {
           EasylinkFlutter.linkstop();
         }
-        if (cbstr.substring(0,1) == "{") {
+        if (cbstr.substring(0,1) == "{") { //是 JSON
           _jsoninfo = object;
-          _displayinfo = "OK";
+          _displayinfo = "OK!";
         } else {
           _displayinfo = object;
         }
@@ -80,13 +80,12 @@
   }
 ```
 
-## 安卓运行时需要注意的事项
+## 注意事项
 
-- Android 版暂不支持接收设备返回的信息，但可以正常完成配网。
-  - Java 代码中已包括支持接收设备信息的方法 `startFTC` 和 `stopFTC`，但目前如果使用会导致闪退。
-- Android 版加入插件线前，需要修改 `android\app\src\main\AndroidManifest.xml` 文件：
+1. Android 版加入插件前，需要修改 `android\app\src\main\AndroidManifest.xml` 文件：
   - 在 `<manifest>` 节点添加 `xmlns:tools="http://schemas.android.com/tools"`
   - 在 `<application>` 节点添加 `tools:replace="android:label"`
+2. 在 iOS > 12 或 Android > 8 时，要获取 WiFi 网络名称必须先拥有「位置服务」权限。
 
 ## 支持版本
 
