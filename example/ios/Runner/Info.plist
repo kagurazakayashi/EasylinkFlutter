@@ -2,16 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>To automatically get the name of the currently connected WiFi network, you need to allow location permission.</string>
-	<key>NSLocationUsageDescription</key>
-	<string>To automatically get the name of the currently connected WiFi network, you need to allow location permission.</string>
-	<key>NSLocationAlwaysUsageDescription</key>
-	<string>To automatically get the name of the currently connected WiFi network, you need to allow location permission.</string>
-	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>To automatically get the name of the currently connected WiFi network, you need to allow location permission.</string>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>Easylink Flutter Example</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -49,5 +43,7 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<false/>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 </dict>
 </plist>

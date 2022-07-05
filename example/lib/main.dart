@@ -1,18 +1,17 @@
 // 示例程序
+// ignore: directives_ordering
+import 'dart:async';
 import 'dart:io';
 import 'dart:ui';
 
-import 'package:flutter/material.dart';
-// ignore: directives_ordering
-import 'dart:async';
-
-import 'package:connectivity/connectivity.dart';
-import 'package:flutter/services.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:easylink_flutter/easylink_flutter.dart';
 import 'package:easylink_flutter/easylink_notification.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
 
-void main() => runApp(MyApp());
+void main() => runApp(const MyApp());
 
 class PersonData {
   String name = '';
@@ -20,6 +19,8 @@ class PersonData {
 }
 
 class MyApp extends StatefulWidget {
+  const MyApp({Key? key}) : super(key: key);
+
   @override
   _MyAppState createState() => _MyAppState();
 }
@@ -32,10 +33,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   TextEditingController ssidController = TextEditingController();
   TextEditingController pwController = TextEditingController();
   PersonData person = PersonData();
-  bool _autovalidate = false;
   bool isstartlink = false;
   String tag = '[EasyLinkFlutter Example APP] ';
   int getrepnum = 0;
+  bool isOpenWiFi = false;
 
   @override
   void initState() {
@@ -78,9 +79,19 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   // ignore: always_declare_return_types
   getConnectivity() async {
     // ignore: unnecessary_parenthesis
-    final ConnectivityResult connectivityResult = await (Connectivity().checkConnectivity());
+    final ConnectivityResult connectivityResult =
+        await (Connectivity().checkConnectivity());
     if (connectivityResult != ConnectivityResult.wifi) {
       print('没开WiFi');
+      setState(() {
+        _displayinfo = "未连接Wi-Fi";
+      });
+      isOpenWiFi = false;
+    } else {
+      setState(() {
+        _displayinfo = "Unknown";
+      });
+      isOpenWiFi = true;
     }
   }
 
@@ -104,7 +115,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       print('权限申请通过');
       // 以下两种方式都能获取SSID
       getConnectivity();
-      getssid();
+      if (isOpenWiFi) {
+        getssid();
+      }
     } else {
       print('权限申请被拒绝');
       if (getrepnum < 1) {
@@ -116,14 +129,16 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   Future<void> getssid() async {
     try {
       // ignore: always_specify_types
-      final Map wifiinfo = await EasylinkFlutter.getwifiinfo();
-      print(tag + '插件返回信息：');
+      final Map? wifiinfo = await EasylinkFlutter.getwifiinfo();
+      print('$tag插件返回信息：');
       print(wifiinfo);
       //wifiinfo: BSSID,SSID,SSIDDATA
-      if (wifiinfo.isEmpty) {
-        checkPermission(Permission.locationWhenInUse);
-      } else {
-        ssidController.text = wifiinfo['SSID'] as String;
+      if (wifiinfo != null) {
+        if (wifiinfo.isEmpty) {
+          checkPermission(Permission.locationWhenInUse);
+        } else {
+          ssidController.text = wifiinfo['SSID'] as String;
+        }
       }
     } on PlatformException {
       //ssidController.text  = '';
@@ -132,7 +147,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
   // Platform messages are asynchronous, so we initialize in an async method.
   Future<void> linkstart() async {
-    String displayinfo;
+    String? displayinfo;
     // Platform messages may fail, so we use a try/catch PlatformException.
     setState(() {
       _displayinfo = 'Searching...';
@@ -156,10 +171,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
             EasylinkFlutter.linkstop();
           }
           if (cbstr.substring(0, 1) == '{') {
-            _jsoninfo = object as String;
+            _jsoninfo = object;
             _displayinfo = 'OK';
           } else {
-            _displayinfo = object as String;
+            _displayinfo = object;
           }
           isstartlink = false;
           _btntext = '▶️ START';
@@ -177,30 +192,31 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     if (!mounted) return;
 
     setState(() {
-      _displayinfo = displayinfo;
+      _displayinfo = displayinfo!;
     });
   }
 
-  String _validateName(String value) {
-    // ignore: always_put_control_body_on_new_line
-    if (value.isEmpty) return '用户名不能为空.';
+  String? _validateName(String? value) {
+    if (value != null && value.isEmpty) return '用户名不能为空.';
     // final RegExp nameExp = RegExp(r'^[0-9a-zA-Z]+$');
     // if (!nameExp.hasMatch(value)) return '只能输入字母和数字.';
     return null;
   }
 
-  String _validatePassWord(String value) {
+  String? _validatePassWord(String? value) {
     // ignore: always_put_control_body_on_new_line
-    if (value.isEmpty) return '密码不能为空.';
+    if (value != null && value.isEmpty) return '密码不能为空.';
     return null;
   }
 
   void startbtn() {
     // checkPermission();
-    final FormState form = _formKey.currentState;
+    final FormState? form = _formKey.currentState;
+    if (form == null) {
+      return;
+    }
     if (!form.validate()) {
-      _autovalidate = true; // 开始验证每个更改.
-      print(tag + '表单输入不正确');
+      print('$tag表单输入不正确');
     } else {
       form.save();
       if (!isstartlink) {
@@ -250,7 +266,6 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
           ),
           body: Form(
             key: _formKey,
-            autovalidate: _autovalidate,
             child: SingleChildScrollView(
               child: Column(
                 children: <Widget>[
@@ -271,8 +286,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       // labelStyle: TextStyle(color: Colors.white54),
                       // fillColor: Colors.white,
                     ),
-                    onSaved: (String value) {
-                      person.name = value;
+                    onSaved: (String? value) {
+                      person.name = value!;
                     },
                     validator: _validateName,
                     controller: ssidController,
@@ -293,9 +308,9 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       // fillColor: Colors.white,
                     ),
                     validator: _validatePassWord,
-                    onSaved: (String value) {
+                    onSaved: (String? value) {
                       setState(() {
-                        person.password = value;
+                        person.password = value!;
                       });
                     },
                     controller: pwController,
@@ -303,10 +318,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                   Center(
                     child: Column(
                       children: <Widget>[
-                        FlatButton(
+                        TextButton(
                           onPressed: startorstopbtn,
                           child: Text(_btntext),
-                        ),FlatButton(
+                        ),
+                        TextButton(
                           onPressed: () {
                             stopbtn();
                             exit(0);
@@ -316,7 +332,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
                       ],
                     ),
                   ),
-                  Container(
+                  SizedBox(
                     width: windowWidth,
                     child: Text(_jsoninfo),
                   )

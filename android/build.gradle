@@ -1,4 +1,4 @@
-group 'com.example.easylink_flutter'
+group 'com.nya.easylink_flutter'
 version '1.0'
 
 buildscript {
