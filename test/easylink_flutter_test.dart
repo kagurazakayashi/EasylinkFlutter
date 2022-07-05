@@ -1,6 +1,6 @@
+import 'package:easylink_flutter/easylink_flutter.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:easylink_flutter/easylink_flutter.dart';
 
 void main() {
   const MethodChannel channel = MethodChannel('easylink_flutter');
@@ -18,6 +18,7 @@ void main() {
   });
 
   test('getPlatformVersion', () async {
-    expect(await EasylinkFlutter.linkstart(ssid: 'null', password: 'null'), '42');
+  final EasyLink _easyLink = EasyLink();
+    expect(await _easyLink.linkstart(ssid: 'null', password: 'null'), '42');
   });
 }

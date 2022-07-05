@@ -1,8 +1,11 @@
-// 插件程序
-import 'dart:async';
+// You have generated a new plugin project without specifying the `--platforms`
+// flag. A plugin project with no platform support was generated. To add a
+// platform, run `flutter create -t plugin --platforms <platforms> .` under the
+// same directory. You can also find a detailed instruction on how to add
+// platforms in the `pubspec.yaml` at
+// https://flutter.dev/docs/development/packages-and-plugins/developing-packages#plugin-platforms.
 
-import 'package:easylink_flutter/easylink_notification.dart';
-import 'package:flutter/services.dart';
+import 'easylink_flutter_platform_interface.dart';
 
 enum EasyLinkMode {
   EASYLINK_V1,
@@ -14,54 +17,26 @@ enum EasyLinkMode {
   EASYLINK_MODE_MAX,
 }
 
-// ignore: avoid_classes_with_only_static_members
-class EasylinkFlutter {
-  // 建立OC通道
-  // static MethodChannel _channel =
-  //     const MethodChannel('easylink_flutter').setMethodCallHandler((MethodCall methodCall){
-
-  //     });
-
-  static final MethodChannel _channel = const MethodChannel('easylink_flutter')
-    ..setMethodCallHandler((MethodCall methodCall) {
-      if ('onCallback' == methodCall.method) {
-        EasyLinkNotification.instance.postNotification('linkstate', methodCall.arguments);
-      }
-      // ignore: always_specify_types
-      return Future.value(true);
-    });
-
-  // 开始配网
-  static Future<String?> linkstart(
+class EasyLink {
+  Future<String?> linkstart(
       {required String ssid,
       required String password,
       EasyLinkMode mode = EasyLinkMode.EASYLINK_V2_PLUS,
-      int timeout = 60}) async {
-    print(mode);
-    // ignore: always_specify_types
-    final String? version = await _channel.invokeMethod('linkstart', {
-      'ssid': ssid,
-      'key': password,
-      'mode': mode.index.toString(),
-      'timeout': timeout.toString()
-    });
-    print(version);
-    return version;
+      int timeout = 60}) {
+    return EasyLinkPlatform.instance.linkstart(
+        ssid: ssid, password: password, mode: mode, timeout: timeout);
   }
-  static Future<void> ls() async {
-    await _channel.invokeMethod('ls');
+
+  Future<void> ls() {
+    return EasyLinkPlatform.instance.ls();
   }
-  static Future<String?> linkstop() async {
-    final String? version = await _channel.invokeMethod('linkstop');
-    print(version);
-    return version;
+
+  Future<String?> linkstop() {
+    return EasyLinkPlatform.instance.linkstop();
   }
 
   // ignore: always_specify_types
-  static Future<Map?> getwifiinfo() async {
-    // ignore: always_specify_types
-    final Map? wifiinfo = await _channel.invokeMethod('getwifiinfo');
-    //wifiinfo: BSSID,SSID,SSIDDATA
-    return wifiinfo;
+  Future<Map?> getwifiinfo() {
+    return EasyLinkPlatform.instance.getwifiinfo();
   }
 }

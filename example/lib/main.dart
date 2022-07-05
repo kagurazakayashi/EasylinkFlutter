@@ -6,7 +6,7 @@ import 'dart:ui';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:easylink_flutter/easylink_flutter.dart';
-import 'package:easylink_flutter/easylink_notification.dart';
+import 'package:easylink_flutter/easylink_flutter_notification.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:permission_handler/permission_handler.dart';
@@ -37,10 +37,11 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   String tag = '[EasyLinkFlutter Example APP] ';
   int getrepnum = 0;
   bool isOpenWiFi = false;
+  final EasyLink _easyLink = EasyLink();
+  int ssidNullCount = 0;
 
   @override
   void initState() {
-    getssid();
     getConnectivity();
     ssidController.text = '';
     pwController.text = '';
@@ -73,7 +74,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     super.dispose();
     ssidController.clear();
     pwController.clear();
-    EasylinkFlutter.linkstop();
+    _easyLink.linkstop();
   }
 
   // ignore: always_declare_return_types
@@ -97,15 +98,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
 
 //获取权限
   // ignore: always_declare_return_types
-  requestPermission(Permission rep) async {
+  requestPermission(BuildContext context, Permission rep) async {
     print('申请权限');
     await rep.request();
-    checkPermission(rep);
+    checkPermission(context, rep);
     getrepnum++;
   }
 
   // ignore: always_declare_return_types
-  checkPermission(Permission rep) async {
+  checkPermission(BuildContext context, Permission rep) async {
     // PermissionStatus permission =
     // await PermissionHandler().checkPermissionStatus(rep);
     // Scaffold.of(context).showSnackBar(SnackBar(
@@ -116,26 +117,31 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
       // 以下两种方式都能获取SSID
       getConnectivity();
       if (isOpenWiFi) {
-        getssid();
+        getssid(context);
       }
     } else {
       print('权限申请被拒绝');
       if (getrepnum < 1) {
-        requestPermission(rep);
+        requestPermission(context, rep);
       }
     }
   }
 
-  Future<void> getssid() async {
+  Future<void> getssid(BuildContext context) async {
     try {
       // ignore: always_specify_types
-      final Map? wifiinfo = await EasylinkFlutter.getwifiinfo();
+      final Map? wifiinfo = await _easyLink.getwifiinfo();
       print('$tag插件返回信息：');
       print(wifiinfo);
       //wifiinfo: BSSID,SSID,SSIDDATA
       if (wifiinfo != null) {
         if (wifiinfo.isEmpty) {
-          checkPermission(Permission.locationWhenInUse);
+          if (ssidNullCount < 5) {
+            checkPermission(context, Permission.locationWhenInUse);
+            // } else if (ssidNullCount == 5) {
+            //   showOASDialog(context);
+          }
+          ssidNullCount++;
         } else {
           ssidController.text = wifiinfo['SSID'] as String;
         }
@@ -143,6 +149,33 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     } on PlatformException {
       //ssidController.text  = '';
     }
+  }
+
+  void showOASDialog(BuildContext context) async {
+    var alert = AlertDialog(
+      title: const Text("未获取到位置权限"),
+      content: const Text('请点击确认跳转到设置页面并开启位置权限的\'仅在使用中允许\''),
+      actions: [
+        TextButton(
+          onPressed: () {
+            openAppSettings();
+          },
+          child: const Text('确认'),
+        ),
+        TextButton(
+          onPressed: () {
+            Navigator.pop(context);
+          },
+          child: const Text('取消'),
+        ),
+      ],
+    );
+    showDialog<void>(
+      context: context,
+      builder: (BuildContext context) {
+        return alert;
+      },
+    );
   }
 
   // Platform messages are asynchronous, so we initialize in an async method.
@@ -154,7 +187,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     });
 
     try {
-      displayinfo = await EasylinkFlutter.linkstart(
+      displayinfo = await _easyLink.linkstart(
           ssid: person.name,
           password: person.password,
           mode: EasyLinkMode.EASYLINK_V2_PLUS,
@@ -168,7 +201,7 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         setState(() {
           final String cbstr = object as String;
           if (cbstr != 'Stop' && cbstr != 'Unknown') {
-            EasylinkFlutter.linkstop();
+            _easyLink.linkstop();
           }
           if (cbstr.substring(0, 1) == '{') {
             _jsoninfo = object;
@@ -237,111 +270,130 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
   Future<void> slbtn() async {
-    await EasylinkFlutter.ls();
+    await _easyLink.ls();
   }
 
   void stopbtn() {
     isstartlink = false;
     _btntext = '▶️ START';
-    EasylinkFlutter.linkstop();
+    _easyLink.linkstop();
     _displayinfo = 'Stopped.';
   }
 
   @override
   Widget build(BuildContext context) {
+    // getssid(context);
     final MediaQueryData mqdwindow = MediaQueryData.fromWindow(window);
     final double windowWidth = mqdwindow.size.width;
     return MaterialApp(
-      home: WillPopScope(
-        onWillPop: () async {
-          // ignore: always_put_control_body_on_new_line
-          if (isstartlink) stopbtn();
-          // ignore: always_specify_types
-          return Future.value(true);
-        },
-        child: Scaffold(
-          appBar: AppBar(
-            leading: Image.asset('images/icon.png'),
-            title: Text(_displayinfo),
-          ),
-          body: Form(
-            key: _formKey,
-            child: SingleChildScrollView(
-              child: Column(
-                children: <Widget>[
-                  TextFormField(
-                    // initialValue: person.name,
-                    textCapitalization: TextCapitalization.words,
-                    // style: TextStyle(color: Colors.white),
-                    decoration: const InputDecoration(
-                      border: UnderlineInputBorder(),
-                      filled: true,
-                      icon: Icon(
-                        Icons.wifi,
-                        // color: Colors.white,
-                      ),
-                      hintText: 'WiFi SSID',
-                      // hintStyle: TextStyle(color: Colors.white54),
-                      labelText: 'WiFi SSID',
-                      // labelStyle: TextStyle(color: Colors.white54),
-                      // fillColor: Colors.white,
-                    ),
-                    onSaved: (String? value) {
-                      person.name = value!;
-                    },
-                    validator: _validateName,
-                    controller: ssidController,
-                  ),
-                  const SizedBox(height: 24.0),
-                  TextFormField(
-                    decoration: const InputDecoration(
-                      border: UnderlineInputBorder(),
-                      filled: true,
-                      icon: Icon(
-                        Icons.vpn_key,
-                        // color: Colors.white,
-                      ),
-                      hintText: 'WiFi Password',
-                      // hintStyle: TextStyle(color: Colors.white54),
-                      labelText: 'WiFi Password',
-                      // labelStyle: TextStyle(color: Colors.white54),
-                      // fillColor: Colors.white,
-                    ),
-                    validator: _validatePassWord,
-                    onSaved: (String? value) {
-                      setState(() {
-                        person.password = value!;
-                      });
-                    },
-                    controller: pwController,
-                  ),
-                  Center(
-                    child: Column(
-                      children: <Widget>[
-                        TextButton(
-                          onPressed: startorstopbtn,
-                          child: Text(_btntext),
+      home: Builder(builder: (context) {
+        getssid(context);
+        return WillPopScope(
+          onWillPop: () async {
+            // ignore: always_put_control_body_on_new_line
+            if (isstartlink) stopbtn();
+            // ignore: always_specify_types
+            return Future.value(true);
+          },
+          child: Scaffold(
+            appBar: AppBar(
+              leading: Image.asset('images/icon.png'),
+              title: Text(_displayinfo),
+              actions: [
+                IconButton(
+                  onPressed: () {
+                    ssidNullCount = 0;
+                    getssid(context);
+                  },
+                  icon: const Icon(Icons.repeat),
+                ),
+              ],
+            ),
+            body: Form(
+              key: _formKey,
+              child: SingleChildScrollView(
+                child: Column(
+                  children: <Widget>[
+                    TextFormField(
+                      // initialValue: person.name,
+                      textCapitalization: TextCapitalization.words,
+                      // style: TextStyle(color: Colors.white),
+                      decoration: const InputDecoration(
+                        border: UnderlineInputBorder(),
+                        filled: true,
+                        icon: Icon(
+                          Icons.wifi,
+                          // color: Colors.white,
                         ),
-                        TextButton(
-                          onPressed: () {
-                            stopbtn();
-                            exit(0);
-                          },
-                          child: const Text('EXIT'),
-                        ),
-                      ],
+                        hintText: 'WiFi SSID',
+                        // hintStyle: TextStyle(color: Colors.white54),
+                        labelText: 'WiFi SSID',
+                        // labelStyle: TextStyle(color: Colors.white54),
+                        // fillColor: Colors.white,
+                        // suffixIcon: IconButton(
+                        //   onPressed: () {
+                        //     showOASDialog(context);
+                        //   },
+                        //   icon: const Icon(Icons.repeat),
+                        // ),
+                      ),
+                      onSaved: (String? value) {
+                        person.name = value!;
+                      },
+                      validator: _validateName,
+                      controller: ssidController,
                     ),
-                  ),
-                  SizedBox(
-                    width: windowWidth,
-                    child: Text(_jsoninfo),
-                  )
-                ],
+                    const SizedBox(height: 24.0),
+                    TextFormField(
+                      decoration: const InputDecoration(
+                        border: UnderlineInputBorder(),
+                        filled: true,
+                        icon: Icon(
+                          Icons.vpn_key,
+                          // color: Colors.white,
+                        ),
+                        hintText: 'WiFi Password',
+                        // hintStyle: TextStyle(color: Colors.white54),
+                        labelText: 'WiFi Password',
+                        // labelStyle: TextStyle(color: Colors.white54),
+                        // fillColor: Colors.white,
+                      ),
+                      validator: _validatePassWord,
+                      onSaved: (String? value) {
+                        setState(() {
+                          person.password = value!;
+                        });
+                      },
+                      controller: pwController,
+                    ),
+                    Center(
+                      child: Column(
+                        children: <Widget>[
+                          TextButton(
+                            onPressed: startorstopbtn,
+                            child: Text(_btntext),
+                          ),
+                          TextButton(
+                            onPressed: () {
+                              stopbtn();
+                              exit(0);
+                            },
+                            child: const Text('EXIT'),
+                          ),
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      width: windowWidth,
+                      child: Text(_jsoninfo),
+                    )
+                  ],
+                ),
               ),
             ),
           ),
-        ),
-      ),
+        );
+      }),
     );
   }
 }
