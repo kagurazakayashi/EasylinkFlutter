@@ -1,4 +1,4 @@
-package com.nya.easylink_flutter;
+package moe.yashi.easylink_flutter;
 
 import android.annotation.SuppressLint;
 import android.os.Bundle;

@@ -1,4 +1,4 @@
-package com.nya.easylink_flutter;
+package moe.yashi.easylink_flutter;
 
 import android.content.Context;
 import android.net.nsd.NsdServiceInfo;

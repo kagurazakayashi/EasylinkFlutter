@@ -1,4 +1,4 @@
-group 'com.nya.easylink_flutter'
+group 'moe.yashi.easylink_flutter'
 version '1.0'
 
 buildscript {

@@ -1,4 +1,4 @@
-package com.nya.easylink_flutter;
+package moe.yashi.easylink_flutter;
 
 import io.flutter.plugin.common.BinaryMessenger;
 import android.content.Context;

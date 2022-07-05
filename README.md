@@ -4,6 +4,8 @@
 
 对基于 MXCHIP/MXOS 的 IoT WiFi 硬件模组进行无线网络设置的发送工作的 Flutter 插件。
 
+支持平台： Android, iOS.
+
 ## 使用方法
 
 1. 引入本插件。
