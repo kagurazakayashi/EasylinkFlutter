@@ -1,8 +1,8 @@
 // 示例程序
+// 示例程序保留 print 输出以便观察配网过程，并沿用原有「异步后继续使用 context」的写法。
+// ignore_for_file: avoid_print, use_build_context_synchronously
 // ignore: directives_ordering
-import 'dart:async';
 import 'dart:io';
-import 'dart:ui';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:easylink_flutter/easylink_flutter.dart';
@@ -19,10 +19,10 @@ class PersonData {
 }
 
 class MyApp extends StatefulWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
-  _MyAppState createState() => _MyAppState();
+  State<MyApp> createState() => _MyAppState();
 }
 
 class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
@@ -63,6 +63,8 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
         // ignore: always_put_control_body_on_new_line
         if (isstartlink) stopbtn();
         break;
+      case AppLifecycleState.hidden: // 应用程序部分可见（新版本新增的状态）
+        break;
       case AppLifecycleState.detached:
         // print('detached');
         break;
@@ -77,12 +79,10 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
     _easyLink.linkstop();
   }
 
-  // ignore: always_declare_return_types
-  getConnectivity() async {
-    // ignore: unnecessary_parenthesis
-    final ConnectivityResult connectivityResult =
-        await (Connectivity().checkConnectivity());
-    if (connectivityResult != ConnectivityResult.wifi) {
+  Future<void> getConnectivity() async {
+    final List<ConnectivityResult> connectivityResult =
+        await Connectivity().checkConnectivity();
+    if (!connectivityResult.contains(ConnectivityResult.wifi)) {
       print('没开WiFi');
       setState(() {
         _displayinfo = "未连接Wi-Fi";
@@ -97,16 +97,14 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   }
 
 //获取权限
-  // ignore: always_declare_return_types
-  requestPermission(BuildContext context, Permission rep) async {
+  Future<void> requestPermission(BuildContext context, Permission rep) async {
     print('申请权限');
     await rep.request();
     checkPermission(context, rep);
     getrepnum++;
   }
 
-  // ignore: always_declare_return_types
-  checkPermission(BuildContext context, Permission rep) async {
+  Future<void> checkPermission(BuildContext context, Permission rep) async {
     // PermissionStatus permission =
     // await PermissionHandler().checkPermissionStatus(rep);
     // Scaffold.of(context).showSnackBar(SnackBar(
@@ -283,17 +281,15 @@ class _MyAppState extends State<MyApp> with WidgetsBindingObserver {
   @override
   Widget build(BuildContext context) {
     // getssid(context);
-    final MediaQueryData mqdwindow = MediaQueryData.fromWindow(window);
-    final double windowWidth = mqdwindow.size.width;
     return MaterialApp(
-      home: Builder(builder: (context) {
+      home: Builder(builder: (BuildContext context) {
         getssid(context);
-        return WillPopScope(
-          onWillPop: () async {
+        final double windowWidth = MediaQuery.sizeOf(context).width;
+        return PopScope(
+          canPop: true,
+          onPopInvokedWithResult: (bool didPop, Object? result) {
             // ignore: always_put_control_body_on_new_line
             if (isstartlink) stopbtn();
-            // ignore: always_specify_types
-            return Future.value(true);
           },
           child: Scaffold(
             appBar: AppBar(

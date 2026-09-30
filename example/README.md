@@ -1,16 +1,23 @@
 # easylink_flutter_example
 
-A new Flutter project.
+Demonstrates how to use the `easylink_flutter` plugin.
 
-## Getting Started
+The app requests the location permission, reads the current Wi-Fi SSID through
+the plugin, and starts an EasyLink delivery with the SSID and password typed in
+the form.
 
-This project is a starting point for a Flutter application.
+## Run on a device
 
-A few resources to get you started if this is your first Flutter project:
+```
+flutter run -d <device-id>
+```
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Or install the debug build directly:
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+```
+flutter build apk --debug
+adb install -r build/app/outputs/flutter-apk/app-debug.apk
+```
+
+`permission_handler` is used only by this example to request the location
+permission that Android requires for reading the Wi-Fi SSID.

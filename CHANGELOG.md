@@ -1,3 +1,13 @@
+## 0.10.0 2026.9.30
+
+- 升级到 Flutter 3.47 / Dart 3.13，pubspec 约束改为 `sdk: ^3.13.4`
+- Android 构建链升级为 Gradle 9.3.1、AGP 9.1.0、Kotlin 2.4.0、Java 17，构建脚本改为 Kotlin DSL
+- Android 库模块与示例工程改用 `namespace`，移除 v1 embedding 的 `registerWith`
+- `easylinkv3` 依赖改为从阿里云 jcenter 镜像获取，并排除与 AndroidX 冲突的 support 库
+- 示例工程依赖升级：`connectivity_plus` 7、`permission_handler` 13、`flutter_lints` 6
+- 示例代码适配新 API：`PopScope`、`MediaQuery.sizeOf`、`ConnectivityResult` 列表返回值
+- 清理分析配置中已被 Dart 3 移除或弃用的 lint 规则
+
 ## 0.9.1 2020.7.1
 
 - 停止前自动判断运行状态

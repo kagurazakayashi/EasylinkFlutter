@@ -103,6 +103,13 @@ unlinked_spec.ds
 # Coverage
 coverage/
 
+# Local scratch directory (session backups, generated probes)
+.tmp/
+
+# Agent instruction files (kept local, not versioned)
+AGENTS.md
+MEMORY.md
+
 # Symbols
 app.*.symbols
 

@@ -26,7 +26,7 @@ class EasyLinkNotification {
   Map<String, GetObject> getObject = <String, GetObject>{};
 
   //添加监听者方法
-  void addObserver(String postName, object(dynamic object)) {
+  void addObserver(String postName, GetObject object) {
     postNameMap[postName] = null;
     getObject[postName] = object;
   }
