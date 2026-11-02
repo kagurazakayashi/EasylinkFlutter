@@ -1,5 +1,6 @@
 #import "EasylinkFlutterPlugin.h"
 #import "MXCHIPAirlink.h"
+#import <NetworkExtension/NetworkExtension.h>
 
 @implementation EasylinkFlutterPlugin
 FlutterMethodChannel* channel;
@@ -29,6 +30,25 @@ MXCHIPAirlink *mx;
 - (void)ssid:(FlutterMethodCall*)call result:(FlutterResult)result {
 //    NSData *ssiddata = [EASYLINK ssidDataForConnectedNetwork];
 //    result([[NSString alloc] initWithBytes:ssiddata.bytes length:ssiddata.length encoding:NSUTF8StringEncoding]);
+    // iOS 14 起推荐使用 NEHotspotNetwork；旧接口 CNCopyCurrentNetworkInfo 从 iOS 26 起已失效。
+    if (@available(iOS 14.0, *)) {
+        [NEHotspotNetwork fetchCurrentWithCompletionHandler:^(NEHotspotNetwork * _Nullable currentNetwork) {
+            NSMutableDictionary *returninfo = [NSMutableDictionary dictionary];
+            if (currentNetwork) {
+                if (currentNetwork.SSID) {
+                    [returninfo setValue:currentNetwork.SSID forKey:@"SSID"];
+                }
+                if (currentNetwork.BSSID) {
+                    [returninfo setValue:currentNetwork.BSSID forKey:@"BSSID"];
+                }
+            }
+            dispatch_async(dispatch_get_main_queue(), ^{
+                result(returninfo);
+            });
+        }];
+        return;
+    }
+
     NSArray *interfaces = (__bridge_transfer NSArray*)CNCopySupportedInterfaces();
     NSDictionary *info = nil;
     for (NSString *ifname in interfaces) {
@@ -39,11 +59,6 @@ MXCHIPAirlink *mx;
         info = nil;
     }
 
-//    NSString *ssid = nil;
-//    if ( info ){
-//        ssid = [info objectForKey:@"SSID"];
-//    }
-    
     NSDictionary *returninfo = info? info:[NSDictionary dictionary];
     result(returninfo);
 }
